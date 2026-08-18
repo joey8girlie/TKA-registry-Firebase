@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TKA Registry — ระบบบันทึกข้อมูลผ่าตัดเปลี่ยนข้อเข่า</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+
+<style>
+/* ============================================================
+   TKA REGISTRY  — Design tokens
+   ============================================================ */
+:root{
+  --bg:#F4F6F6;
+  --surface:#FFFFFF;
+  --surface-2:#EFF3F2;
+  --ink:#152524;
+  --ink-soft:#54655F;
+  --ink-faint:#8A9793;
+  --line:#DEE6E3;
+  --line-soft:#EAEFED;
+  --primary:#0F4C4A;
+  --primary-light:#17716C;
+  --primary-glow:#DCEFEA;
+  --accent:#BE8A34;
+  --accent-soft:#F3E6C8;
+  --danger:#AC4038;
+  --danger-soft:#F6E1DE;
+  --success:#2E7D5B;
+  --success-soft:#DFEFE5;
+  --radius:10px;
+  --serif:'Noto Serif Thai','Noto Serif',serif;
+  --sans:'Noto Sans Thai','Inter',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+  --shadow: 0 1px 2px rgba(15,76,74,0.06), 0 4px 16px rgba(15,76,74,0.06);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+h1,h2,h3,.serif{font-family:var(--serif); font-weight:600; letter-spacing:.01em;}
+.mono{font-family:var(--mono);}
+a{color:var(--primary-light);}
+button{font-family:var(--sans);}
+::selection{background:var(--primary-glow);}
+
+/* focus visibility */
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid var(--primary-light); outline-offset:2px;
+}
+
+/* ---------- layout shells ---------- */
+#app-shell{display:none;min-height:100vh;flex-direction:column;}
+.topbar{
+  position:sticky; top:0; z-index:40;
+  background:var(--primary);
+  color:#EFF6F4;
+  display:flex; align-items:center; gap:14px;
+  padding:10px 18px;
+  box-shadow:var(--shadow);
+}
+.topbar .brand{display:flex; align-items:center; gap:10px; margin-right:auto;}
+.brand .mark{
+  width:34px;height:34px;border-radius:8px;
+  background:linear-gradient(155deg,var(--accent),#8f6420);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif); font-weight:700; color:#241a06; font-size:15px;
+  flex:none;
+}
+.brand .titles{line-height:1.15;}
+.brand .titles b{font-family:var(--serif); font-size:16px; display:block;}
+.brand .titles span{font-size:11px; color:#BFE0D9; letter-spacing:.04em;}
+
+.nav-tabs{display:flex; gap:2px; overflow-x:auto; scrollbar-width:none;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.nav-tabs button{
+  background:transparent;border:none;color:#CFE7E1;
+  padding:9px 13px;border-radius:8px;font-size:13.5px;font-weight:600;
+  white-space:nowrap;cursor:pointer;
+}
+.nav-tabs button:hover{background:rgba(255,255,255,.08); color:#fff;}
+.nav-tabs button.active{background:rgba(255,255,255,.14); color:#fff;}
+.nav-tabs button.hidden{display:none;}
+
+.user-chip{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.08); border-radius:20px; padding:5px 6px 5px 12px;
+  font-size:12.5px; color:#EAF5F2; flex:none;
+}
+.user-chip .role-badge{
+  background:var(--accent); color:#241a06; font-weight:700;
+  border-radius:20px; padding:3px 9px; font-size:10.5px; letter-spacing:.03em;
+}
+.user-chip button{
+  background:rgba(255,255,255,.14); border:none; color:#fff; cursor:pointer;
+  border-radius:16px; padding:6px 11px; font-size:12px; font-weight:600;
+}
+.user-chip button:hover{background:rgba(255,255,255,.24);}
+
+main{flex:1; width:100%; max-width:1180px; margin:0 auto; padding:20px 16px 64px;}
+.view{display:none; animation:fadein .18s ease;}
+.view.active{display:block;}
+@keyframes fadein{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+
+.page-head{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:18px; flex-wrap:wrap;}
+.page-head h1{font-size:22px; margin:0 0 4px;}
+.page-head p{margin:0; color:var(--ink-soft); font-size:13.5px;}
+
+.btn{
+  display:inline-flex; align-items:center; gap:7px; justify-content:center;
+  border-radius:8px; border:1px solid var(--line); background:var(--surface);
+  color:var(--ink); font-size:13.5px; font-weight:600; padding:9px 15px;
+  cursor:pointer; transition:.12s; white-space:nowrap;
+}
+.btn:hover{border-color:var(--primary-light); color:var(--primary);}
+.btn-primary{background:var(--primary); border-color:var(--primary); color:#fff;}
+.btn-primary:hover{background:var(--primary-light); border-color:var(--primary-light); color:#fff;}
+.btn-accent{background:var(--accent); border-color:var(--accent); color:#241a06;}
+.btn-accent:hover{filter:brightness(1.06); color:#241a06;}
+.btn-danger{background:var(--danger); border-color:var(--danger); color:#fff;}
+.btn-danger:hover{filter:brightness(1.08);}
+.btn-ghost{background:transparent; border-color:transparent;}
+.btn-ghost:hover{background:var(--surface-2);}
+.btn-sm{padding:6px 11px; font-size:12.5px; border-radius:7px;}
+.btn:disabled{opacity:.5; cursor:not-allowed;}
+
+/* ---------- cards / surfaces ---------- */
+.card{background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius); box-shadow:var(--shadow);}
+.card-pad{padding:18px 20px;}
+
+/* ---------- dashboard ---------- */
+.vitals-strip{
+  display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:20px;
+}
+@media(max-width:900px){.vitals-strip{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:520px){.vitals-strip{grid-template-columns:repeat(2,1fr);}}
+.vital{
+  background:var(--primary); border-radius:var(--radius); padding:14px 14px 12px;
+  color:#EAF5F2; position:relative; overflow:hidden;
+}
+.vital.alt{background:var(--surface); color:var(--ink); border:1px solid var(--line-soft);}
+.vital::after{content:"";position:absolute; right:-20px; top:-20px; width:70px; height:70px; border-radius:50%; background:rgba(255,255,255,.06);}
+.vital.alt::after{display:none;}
+.vital .label{font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; opacity:.75; margin-bottom:6px;}
+.vital .num{font-family:var(--mono); font-size:26px; font-weight:600; line-height:1;}
+.vital.alt .num{color:var(--primary);}
+.vital .unit{font-size:11px; opacity:.7; margin-left:3px;}
+
+.chart-card{padding:18px 20px 8px;}
+.chart-card h3{margin:0 0 14px; font-size:15px;}
+.bars{display:flex; align-items:flex-end; gap:10px; height:150px; padding:0 4px;}
+.bar-col{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%;}
+.bar-col .bar{
+  width:100%; max-width:34px; background:linear-gradient(180deg,var(--primary-light),var(--primary));
+  border-radius:5px 5px 2px 2px; transition:height .4s ease;
+}
+.bar-col .bar-val{font-family:var(--mono); font-size:11px; color:var(--ink-soft); margin-bottom:4px;}
+.bar-col .bar-lbl{font-size:10.5px; color:var(--ink-faint); margin-top:6px; white-space:nowrap;}
+.empty-note{color:var(--ink-faint); font-size:13px; padding:20px 4px; text-align:center;}
+
+/* ---------- filters / search ---------- */
+.filter-row{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; align-items:flex-end;}
+.field{display:flex; flex-direction:column; gap:5px;}
+.field label{font-size:11.5px; font-weight:600; color:var(--ink-soft);}
+.field input, .field select, .field textarea{
+  font-family:var(--sans); font-size:13.5px; padding:8px 10px; border-radius:7px;
+  border:1px solid var(--line); background:var(--surface); color:var(--ink); min-width:0;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--primary-light);}
+.field.grow{flex:1; min-width:160px;}
+
+/* ---------- table ---------- */
+.table-wrap{overflow-x:auto; border:1px solid var(--line-soft); border-radius:var(--radius); background:var(--surface);}
+table{width:100%; border-collapse:collapse; font-size:13.5px; min-width:760px;}
+thead th{
+  text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em;
+  color:var(--ink-soft); background:var(--surface-2); padding:10px 12px; border-bottom:1px solid var(--line);
+  white-space:nowrap;
+}
+tbody td{padding:10px 12px; border-bottom:1px solid var(--line-soft); vertical-align:middle;}
+tbody tr:hover{background:var(--primary-glow);}
+tbody tr:last-child td{border-bottom:none;}
+.hn-cell{font-family:var(--mono); font-weight:600; color:var(--primary);}
+.tag{display:inline-block; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700;}
+.tag-rt{background:#E3EEF8; color:#2A5C8A;}
+.tag-lt{background:var(--accent-soft); color:#7A5A17;}
+.tag-bilat{background:var(--success-soft); color:var(--success);}
+.row-actions{display:flex; gap:6px;}
+
+/* ---------- forms ---------- */
+.form-section{margin-bottom:22px;}
+.form-section h3{
+  font-size:14px; margin:0 0 12px; padding-bottom:8px; border-bottom:1px solid var(--line-soft);
+  display:flex; align-items:center; gap:8px; color:var(--primary);
+}
+.form-section h3 .n{
+  font-family:var(--mono); font-size:11px; background:var(--primary-glow); color:var(--primary);
+  border-radius:5px; padding:2px 7px;
+}
+.grid{display:grid; gap:12px;}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+@media(max-width:760px){.grid-4,.grid-3,.grid-2{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:480px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr;}}
+
+.pulse-grid{width:100%; border-collapse:collapse; font-size:13px;}
+.pulse-grid th, .pulse-grid td{border:1px solid var(--line-soft); padding:6px 8px;}
+.pulse-grid thead th{background:var(--surface-2); font-size:11px; text-transform:uppercase; color:var(--ink-soft);}
+.pulse-grid td:first-child{font-weight:600; background:var(--surface-2); white-space:nowrap;}
+.pulse-grid select{width:100%; padding:6px; border-radius:6px; border:1px solid var(--line); font-size:13px;}
+
+.computed-hint{font-family:var(--mono); font-size:11.5px; color:var(--accent); margin-top:3px;}
+
+/* image upload */
+.dropzone{
+  border:2px dashed var(--line); border-radius:var(--radius); padding:22px; text-align:center;
+  color:var(--ink-soft); cursor:pointer; background:var(--surface-2);
+}
+.dropzone:hover{border-color:var(--primary-light); color:var(--primary);}
+.dropzone input{display:none;}
+.image-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; margin-top:14px;}
+.image-card{border:1px solid var(--line-soft); border-radius:9px; overflow:hidden; background:var(--surface);}
+.image-card .thumb{width:100%; height:110px; object-fit:cover; display:block; background:var(--surface-2); cursor:zoom-in;}
+.image-card .meta{padding:8px;}
+.image-card select, .image-card input{width:100%; font-size:11.5px; padding:5px 6px; margin-bottom:5px; border-radius:5px; border:1px solid var(--line);}
+.image-card .rm{width:100%; margin-top:2px;}
+
+.form-actions{display:flex; gap:10px; justify-content:flex-end; margin-top:20px; padding-top:16px; border-top:1px solid var(--line-soft);}
+
+/* ---------- detail / print ---------- */
+.detail-grid{display:grid; grid-template-columns:1fr 1fr; gap:0 28px;}
+@media(max-width:700px){.detail-grid{grid-template-columns:1fr;}}
+.detail-item{padding:9px 0; border-bottom:1px solid var(--line-soft); display:flex; justify-content:space-between; gap:10px; font-size:13.5px;}
+.detail-item .k{color:var(--ink-soft);}
+.detail-item .v{font-weight:600; font-family:var(--mono); text-align:right;}
+.gallery{display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; margin-top:10px;}
+.gallery img{width:100%; height:110px; object-fit:cover; border-radius:8px; border:1px solid var(--line-soft); cursor:zoom-in;}
+.gallery .gcap{font-size:10.5px; color:var(--ink-faint); margin-top:3px; text-align:center;}
+
+/* ---------- auth screen ---------- */
+#auth-screen{
+  min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+  background:radial-gradient(circle at 20% 15%, #12615D 0%, var(--primary) 45%, #0B3231 100%);
+}
+.auth-card{width:100%; max-width:380px; background:var(--surface); border-radius:14px; padding:30px 28px 26px; box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.auth-logo{display:flex; align-items:center; gap:10px; margin-bottom:22px;}
+.auth-logo .mark{width:38px;height:38px;border-radius:9px;background:linear-gradient(155deg,var(--accent),#8f6420); display:flex;align-items:center;justify-content:center;color:#241a06;font-family:var(--serif);font-weight:700;}
+.auth-logo b{font-family:var(--serif); font-size:18px; display:block;}
+.auth-logo span{font-size:11.5px; color:var(--ink-soft);}
+.auth-tabs{display:flex; gap:4px; background:var(--surface-2); border-radius:8px; padding:3px; margin-bottom:18px;}
+.auth-tabs button{flex:1; border:none; background:transparent; padding:8px; border-radius:6px; font-weight:600; font-size:13px; cursor:pointer; color:var(--ink-soft);}
+.auth-tabs button.active{background:var(--surface); color:var(--primary); box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.auth-card .field{margin-bottom:13px;}
+.auth-card .field label{font-size:12px;}
+.auth-card input{width:100%; padding:10px 11px; font-size:14px;}
+#auth-error{color:var(--danger); font-size:12.5px; margin:-4px 0 10px; min-height:15px;}
+#auth-msg{color:var(--success); font-size:12.5px; margin:-4px 0 10px; min-height:15px;}
+.auth-card .btn-primary{width:100%; padding:11px;}
+
+/* ---------- config warning ---------- */
+#config-warning{
+  display:none; background:var(--danger); color:#fff; font-size:13px; padding:12px 18px; text-align:center;
+}
+#config-warning code{background:rgba(255,255,255,.18); padding:1px 6px; border-radius:4px;}
+
+/* ---------- toast ---------- */
+#toast{
+  position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--ink); color:#fff; padding:11px 20px; border-radius:9px; font-size:13.5px;
+  opacity:0; pointer-events:none; transition:.25s; z-index:100; box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+#toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+#toast.err{background:var(--danger);}
+
+/* ---------- lightbox ---------- */
+#lightbox{display:none; position:fixed; inset:0; background:rgba(10,20,18,.88); z-index:200; align-items:center; justify-content:center; padding:30px;}
+#lightbox img{max-width:100%; max-height:100%; border-radius:8px;}
+#lightbox .lb-close{position:absolute; top:18px; right:22px; background:rgba(255,255,255,.12); border:none; color:#fff; width:38px; height:38px; border-radius:50%; font-size:18px; cursor:pointer;}
+
+/* ---------- misc ---------- */
+.loading{display:flex; align-items:center; gap:9px; color:var(--ink-soft); font-size:13.5px; padding:20px;}
+.spinner{width:16px;height:16px;border-radius:50%; border:2px solid var(--line); border-top-color:var(--primary); animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.role-gate.gate-hidden, .admin-gate.gate-hidden{display:none !important;}
+.badge-role{font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:12px; text-transform:capitalize;}
+.badge-admin{background:var(--danger-soft); color:var(--danger);}
+.badge-staff{background:var(--primary-glow); color:var(--primary);}
+.badge-viewer{background:var(--surface-2); color:var(--ink-soft);}
+
+
+@media print{
+  @page{size:A4 portrait;margin:8mm 8mm 9mm 8mm}
+  html,body{width:210mm;min-height:297mm;background:#fff !important;color:#111 !important}
+  body{font-family:Arial,"Noto Sans Thai",sans-serif;font-size:8.5pt;line-height:1.2}
+  #app-shell{display:block !important}
+  #app-shell > .topbar,#config-warning,main > .view > .page-head .btn,.no-print,#bottom-nav,
+  #view-list,#view-form,#view-users,#toast,#lightbox{display:none !important}
+  #view-detail{display:block !important;margin:0 !important;padding:0 !important}
+  #view-detail .page-head{display:block !important;margin:0 0 5mm !important;padding:0 0 2mm !important;border-bottom:1px solid #222}
+  #detail-title{font-size:17pt !important;margin:0 !important;line-height:1.1}
+  #detail-sub{font-size:8.5pt !important;margin:1mm 0 0 !important;color:#444 !important}
+  #view-detail .card{box-shadow:none !important;border:0 !important;border-radius:0 !important;padding:0 !important;margin:0 !important}
+  #detail-body{font-size:8pt !important}
+  #detail-body .detail-grid{display:grid !important;grid-template-columns:repeat(4,minmax(0,1fr)) !important;gap:1.5mm !important}
+  #detail-body .detail-item{padding:1.4mm 1.8mm !important;border:0.25mm solid #ddd !important;border-radius:1.2mm !important;background:#fafafa !important;min-height:8.5mm !important;break-inside:avoid}
+  #detail-body .detail-item .k{display:block !important;font-size:6.5pt !important;color:#666 !important;margin-bottom:.6mm !important}
+  #detail-body .detail-item .v{display:block !important;font-size:8pt !important;font-weight:600 !important;white-space:normal !important}
+  #detail-gallery-card{display:block !important;margin-top:3mm !important}
+  #detail-gallery-card h3{font-size:9pt !important;margin:0 0 1.5mm !important}
+  #detail-gallery{display:grid !important;grid-template-columns:repeat(4,1fr) !important;gap:2mm !important}
+  #detail-gallery > div{break-inside:avoid;text-align:center}
+  #detail-gallery img{width:100% !important;height:25mm !important;object-fit:cover !important;border-radius:1mm !important}
+  #detail-gallery .gcap{font-size:6.5pt !important;color:#555 !important;margin-top:.5mm !important}
+  #print-footer{display:block !important;margin-top:2.5mm !important;padding-top:1.5mm;border-top:.25mm solid #bbb;font-size:6.5pt;color:#666;text-align:right}
+}
+#print-footer{display:none}
+
+@media print{
+  #app-shell > .topbar, #config-warning, main > .view > .page-head .btn, .no-print, #bottom-nav{display:none !important;}
+  main{max-width:100%; padding:0;}
+  body{background:#fff;}
+  .card{box-shadow:none; border:none;}
+}
+
+/* ---------- role status banners ---------- */
+#role-loading-banner, #role-error-banner{
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  font-size:13px; padding:9px 14px; background:var(--surface-2); color:var(--ink-soft);
+  border-bottom:1px solid var(--line);
+}
+#role-error-banner{background:var(--danger-soft); color:var(--danger);}
+#claim-admin-btn.role-gate-inverse{background:var(--accent); color:#241a06; border:none; border-radius:16px; padding:6px 11px; font-size:12px; font-weight:700; cursor:pointer;}
+
+/* ---------- bottom nav (mobile only) ---------- */
+#bottom-nav{
+  display:none;
+  position:fixed; left:0; right:0; bottom:0; z-index:50;
+  background:var(--primary); box-shadow:0 -2px 12px rgba(0,0,0,.15);
+  padding:4px 4px calc(4px + env(safe-area-inset-bottom));
+  gap:2px;
+}
+#bottom-nav button{
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;
+  background:transparent; border:none; color:#BFE0D9; padding:7px 2px 6px; border-radius:9px;
+  font-size:10.5px; cursor:pointer;
+}
+#bottom-nav button .bn-ico{font-size:18px; line-height:1;}
+#bottom-nav button.active{background:rgba(255,255,255,.14); color:#fff;}
+#bottom-nav button.hidden{display:none;}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+@media(max-width:680px){
+  .topbar{
+    flex-wrap:wrap;
+    padding:8px 10px;
+    gap:8px 10px;
+  }
+  .topbar .brand{order:1; margin-right:0;}
+  .brand .titles span{display:none;} /* hide subtitle, keep it compact */
+  .topbar .nav-tabs{display:none;} /* replaced by bottom nav on mobile */
+  .topbar .user-chip{order:2; margin-left:auto;}
+  .user-chip span#user-email{display:none;} /* email hidden on mobile, role badge still shows */
+
+  #bottom-nav{display:flex;}
+  #app-shell{padding-bottom:64px;} /* room for bottom nav */
+
+  main{padding:14px 10px 48px;}
+  .page-head{flex-direction:column; align-items:stretch;}
+  .page-head > div:last-child{display:flex; flex-wrap:wrap;}
+  .page-head .btn, .page-head > div:last-child .btn{flex:1; min-width:0;}
+
+  .filter-row{flex-direction:column; align-items:stretch;}
+  .field.grow{min-width:0;}
+
+  .card-pad{padding:14px;}
+  .vitals-strip{gap:8px;}
+  .vital{padding:11px 11px 10px;}
+  .vital .num{font-size:21px;}
+
+  .form-actions{flex-direction:column-reverse;}
+  .form-actions .btn{width:100%;}
+
+  .auth-card{padding:24px 18px 22px;}
+
+  .row-actions{flex-wrap:wrap;}
+
+  /* ---- list table -> stacked cards ---- */
+  .table-wrap{border:none; background:transparent; overflow:visible;}
+  table{min-width:0;}
+  thead{display:none;}
+  tbody, tr, td{display:block; width:100%;}
+  tbody#list-tbody tr{
+    background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius);
+    box-shadow:var(--shadow); margin-bottom:10px; padding:4px 2px;
+  }
+  tbody#list-tbody tr:hover{background:var(--surface);}
+  tbody#list-tbody td{
+    border-bottom:none; padding:6px 12px; display:flex; justify-content:space-between; align-items:center; gap:10px;
+  }
+  tbody#list-tbody td::before{
+    content:attr(data-label); font-size:11px; font-weight:600; color:var(--ink-faint); flex:none;
+  }
+  tbody#list-tbody td:empty{display:none;}
+  tbody#list-tbody td[data-label=""]{padding-top:2px;}
+  tbody#list-tbody .row-actions{justify-content:flex-end; padding-top:8px; border-top:1px solid var(--line-soft); margin-top:2px;}
+}
+
+.detail-section{margin:0 0 18px;padding:0 0 14px;border-bottom:1px solid var(--line,#e5e7eb)}
+.detail-section:last-child{border-bottom:0;margin-bottom:0}
+.detail-section h3{margin:0 0 10px;font-size:15px;font-weight:700}
+.detail-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.detail-item{padding:9px 11px;background:var(--surface-2,#f7f7f8);border-radius:8px}
+.detail-label{font-size:11px;color:var(--ink-faint,#6b7280);margin-bottom:3px}
+.detail-value{font-size:14px;font-weight:600;word-break:break-word}
+@media(max-width:800px){.detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.detail-grid{grid-template-columns:1fr}}
+
+
+/* Patient detail grouped layout */
+.patient-detail-group{margin:0 0 16px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;background:#fff}
+.patient-detail-group-title{padding:9px 12px;background:#f5f7fa;font-weight:700;font-size:14px;border-bottom:1px solid #e5e7eb}
+.patient-detail-group-body{padding:10px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.patient-detail-item{padding:8px 10px;border:1px solid #eef0f3;border-radius:7px;background:#fafbfc}
+.patient-detail-item .label{font-size:11px;color:#6b7280;margin-bottom:2px}
+.patient-detail-item .value{font-size:13px;font-weight:600;word-break:break-word}
+@media(max-width:800px){.patient-detail-group-body{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.patient-detail-group-body{grid-template-columns:1fr}}
+@media print{
+  .patient-detail-group{break-inside:avoid}
+}
+
+</style>
+</head>
+<body>
+
+<div id="config-warning">
+  ⚡ TKA Registry รุ่น Firebase — เชื่อม Firebase แล้ว และใช้ Google Drive สำหรับรูปภาพ
+</div>
+
+<!-- ============ AUTH SCREEN ============ -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M6.5 3.2c1.5 0 2.7 1.2 2.7 2.7 0 .4-.1.8-.2 1.1l6.4 6.4c.3-.1.7-.2 1.1-.2 1.5 0 2.7 1.2 2.7 2.7s-1.2 2.7-2.7 2.7c-1.5 0-2.7-1.2-2.7-2.7 0-.4.1-.8.2-1.1L7.6 8.4c-.3.1-.7.2-1.1.2-1.5 0-2.7-1.2-2.7-2.7s1.2-2.7 2.7-2.7z" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div><b>TKA Registry</b><span>ระบบบันทึกข้อมูลผ่าตัดเปลี่ยนข้อเข่า</span></div>
+    </div>
+    <div class="auth-tabs">
+      <button id="tab-signin" class="active" onclick="switchAuthTab('signin')">เข้าสู่ระบบ</button>
+      <button id="tab-signup" onclick="switchAuthTab('signup')">สมัครสมาชิก</button>
+    </div>
+    <div id="auth-error"></div>
+    <div id="auth-msg"></div>
+
+    <form id="signin-form" onsubmit="return handleSignIn(event)">
+      <div class="field"><label>Username</label><input type="text" id="si-email" required autocomplete="username"></div>
+      <div class="field"><label>รหัสผ่าน</label><input type="password" id="si-password" required autocomplete="current-password"></div>
+      <button class="btn btn-primary" type="submit" id="si-btn">เข้าสู่ระบบ</button>
+    </form>
+
+    <form id="signup-form" style="display:none" onsubmit="return handleSignUp(event)">
+      <div class="field"><label>ชื่อ-สกุล</label><input type="text" id="su-name" required autocomplete="name"></div>
+      <div class="field"><label>Username (English)</label><input type="text" id="su-username" required autocomplete="username" pattern="[A-Za-z][A-Za-z0-9._-]{2,31}" placeholder="เช่น Udomsak01"></div>
+      <div class="field"><label>Email</label><input type="email" id="su-email" required autocomplete="email" placeholder="name@example.com"></div>
+      <div class="field"><label>รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)</label><input type="password" id="su-password" minlength="6" required autocomplete="new-password"></div>
+      <button class="btn btn-primary" type="submit" id="su-btn">สมัครสมาชิก</button>
+    </form>
+    <p style="font-size:11.5px; color:var(--ink-soft); margin-top:14px; line-height:1.5;">
+      Username ใช้สำหรับเข้าสู่ระบบ ส่วน Email จะถูกผูกไว้กับบัญชีเพื่อยืนยันตัวตนและกู้คืนบัญชี<br>
+      บัญชีที่สมัครใหม่จะเริ่มต้นด้วยสิทธิ์ <b>Viewer</b> (ดูอย่างเดียว) — ให้ผู้ดูแลระบบ (Admin)
+      ปรับสิทธิ์ให้ในเมนู "ผู้ใช้งาน" หลังจากนั้น
+    </p>
+  </div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div id="app-shell">
+  <div class="topbar">
+    <div class="brand">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M6.5 3.2c1.5 0 2.7 1.2 2.7 2.7 0 .4-.1.8-.2 1.1l6.4 6.4c.3-.1.7-.2 1.1-.2 1.5 0 2.7 1.2 2.7 2.7s-1.2 2.7-2.7 2.7c-1.5 0-2.7-1.2-2.7-2.7 0-.4.1-.8.2-1.1L7.6 8.4c-.3.1-.7.2-1.1.2-1.5 0-2.7-1.2-2.7-2.7s1.2-2.7 2.7-2.7z" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="titles"><b>TKA Registry</b><span>v2 · Total Knee Arthroplasty</span></div>
+    </div>
+    <div class="nav-tabs">
+      <button data-view="dashboard" class="active" onclick="showView('dashboard')">แดชบอร์ด</button>
+      <button data-view="list" onclick="showView('list')">รายการผู้ป่วย</button>
+      <button data-view="form" id="nav-add-btn" class="role-gate gate-hidden" onclick="openForm(null)">+ เพิ่มข้อมูล</button>
+      <button data-view="users" id="nav-users-btn" class="hidden" onclick="showView('users')">ผู้ใช้งาน</button>
+    </div>
+    <div class="user-chip">
+      <span id="user-email">-</span>
+      <span class="role-badge" id="user-role-badge">-</span>
+      <button id="claim-admin-btn" class="role-gate-inverse" style="display:none;" onclick="claimAdmin()">ตั้งเป็นแอดมิน</button>
+      <button onclick="handleSignOut()">ออกจากระบบ</button>
+    </div>
+  </div>
+
+  <div id="role-loading-banner" style="display:none;">
+    <span class="spinner"></span> กำลังตรวจสอบสิทธิ์ผู้ใช้…
+  </div>
+  <div id="role-error-banner" style="display:none;">
+    โหลดสิทธิ์ผู้ใช้ไม่สำเร็จ <button class="btn btn-sm" onclick="retryLoadProfile()">ลองใหม่</button>
+  </div>
+
+  <!-- ===== MOBILE BOTTOM NAV ===== -->
+  <nav id="bottom-nav">
+    <button data-view="dashboard" class="active" onclick="showView('dashboard')">
+      <span class="bn-ico">⌂</span><span>แดชบอร์ด</span>
+    </button>
+    <button data-view="list" onclick="showView('list')">
+      <span class="bn-ico">☰</span><span>รายการ</span>
+    </button>
+    <button data-view="form" id="bn-add-btn" class="role-gate gate-hidden" onclick="openForm(null)">
+      <span class="bn-ico">＋</span><span>เพิ่ม</span>
+    </button>
+    <button data-view="users" id="bn-users-btn" class="hidden" onclick="showView('users')">
+      <span class="bn-ico">☺</span><span>ผู้ใช้งาน</span>
+    </button>
+  </nav>
+
+  <main>
+    <!-- ===== DASHBOARD ===== -->
+    <section class="view active" id="view-dashboard">
+      <div class="page-head">
+        <div><h1>แดชบอร์ด</h1><p>ภาพรวมข้อมูลผ่าตัดเปลี่ยนข้อเข่าทั้งหมดในระบบ</p></div>
+        <button class="btn" onclick="loadDashboard()">↻ รีเฟรช</button>
+      <button class="btn no-print admin-gate gate-hidden" id="sync-google-btn" onclick="syncAllToGoogleSheets()">☁ สำรองไป Google Sheets</button></div>
+      <div id="vitals-strip" class="vitals-strip"><div class="loading"><span class="spinner"></span> กำลังโหลดข้อมูล…</div></div>
+      <div class="card chart-card">
+        <h3>จำนวนเคสรายเดือน</h3>
+        <div id="monthly-chart"><div class="loading"><span class="spinner"></span> กำลังโหลดข้อมูล…</div></div>
+      </div>
+    </section>
+
+    <!-- ===== LIST ===== -->
+    <section class="view" id="view-list">
+      <div class="page-head">
+        <div><h1>รายการผู้ป่วย</h1><p>ค้นหาและจัดการข้อมูลผู้ป่วยทั้งหมด</p></div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn" onclick="exportCSV()">⬇ Export CSV</button>
+          <button class="btn btn-accent role-gate gate-hidden" onclick="openForm(null)">+ เพิ่มข้อมูล</button>
+        </div>
+      </div>
+      <div class="card card-pad" style="margin-bottom:16px;">
+        <div class="filter-row">
+          <div class="field grow"><label>ค้นหา (HN / ชื่อ)</label><input type="text" id="f-search" placeholder="เช่น HN123456 หรือ สมชาย" oninput="debouncedLoadList()"></div>
+          <div class="field"><label>Procedure</label>
+            <select id="f-procedure" onchange="loadList()">
+              <option value="">ทั้งหมด</option>
+              <option value="TKA Rt.">TKA Rt.</option>
+              <option value="TKA Lt.">TKA Lt.</option>
+              <option value="Bilat TKA">Bilat TKA</option>
+            </select>
+          </div>
+          <div class="field"><label>วันที่ผ่าตัด (จาก)</label><input type="date" id="f-date-from" onchange="loadList()"></div>
+          <div class="field"><label>ถึง</label><input type="date" id="f-date-to" onchange="loadList()"></div>
+          <button class="btn btn-ghost" onclick="clearFilters()">ล้างตัวกรอง</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>HN</th><th>ชื่อ-สกุล</th><th>Procedure</th><th>วันที่ผ่าตัด</th><th>BMI</th><th>รูป</th><th></th>
+          </tr></thead>
+          <tbody id="list-tbody"><tr><td colspan="7"><div class="loading"><span class="spinner"></span> กำลังโหลดข้อมูล…</div></td></tr></tbody>
+        </table>
+      </div>
+      <p id="list-count" style="font-size:12px; color:var(--ink-faint); margin-top:10px;"></p>
+    </section>
+
+    <!-- ===== FORM (add/edit) ===== -->
+    <section class="view" id="view-form">
+      <div class="page-head">
+        <div><h1 id="form-title">เพิ่มข้อมูลผู้ป่วย</h1><p>กรอกข้อมูลให้ครบถ้วน ระบบจะคำนวณค่าที่เกี่ยวข้องให้อัตโนมัติ</p></div>
+      </div>
+      <form id="record-form" class="card card-pad" novalidate onsubmit="return saveRecord(event)">
+        <input type="hidden" id="rf-id">
+
+        <div class="form-section">
+          <h3><span class="n">1</span> ข้อมูลผู้ป่วย</h3>
+          <div class="grid grid-4">
+            <div class="field"><label>HN *</label><input type="text" id="rf-hn" required></div>
+            <div class="field"><label>คำนำหน้า</label>
+              <select id="rf-name_prefix">
+                <option value="">-</option>
+                <option>นาย</option>
+                <option>นาง</option>
+                <option>นางสาว</option>
+                <option>เด็กชาย</option>
+                <option>เด็กหญิง</option>
+              </select>
+            </div>
+            <div class="field"><label>ชื่อ</label><input type="text" id="rf-first_name"></div>
+            <div class="field"><label>นามสกุล</label><input type="text" id="rf-last_name"></div>
+            <div class="field"><label>เพศ</label><select id="rf-gender"><option value="">-</option><option>ชาย</option><option>หญิง</option></select></div>
+            <div class="field"><label>อายุ (ปี)</label><input type="number" id="rf-age" min="0" max="150"></div>
+            <div class="field"><label>น้ำหนัก (กก.)</label><input type="number" step="0.1" id="rf-weight_kg" oninput="updateBMIPreview()"></div>
+            <div class="field"><label>ส่วนสูง (ซม.)</label><input type="number" step="0.1" id="rf-height_cm" oninput="updateBMIPreview()"></div>
+            <div class="field"><label>BMI (คำนวณอัตโนมัติ)</label><input type="text" id="rf-bmi-preview" disabled placeholder="—"></div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3><span class="n">2</span> การผ่าตัด</h3>
+          <div class="grid grid-4">
+            <div class="field"><label>Procedure</label>
+              <select id="rf-procedure"><option value="">-</option><option>TKA Rt.</option><option>TKA Lt.</option><option>Bilat TKA</option></select>
+            </div>
+            <div class="field"><label>วันที่ผ่าตัด</label><input type="date" id="rf-surgery_date"></div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3><span class="n">3</span> ผล Lab</h3>
+          <div class="grid grid-4">
+            <div class="field"><label>Hct</label><input type="number" step="0.01" id="rf-hct"></div>
+            <div class="field"><label>Hb</label><input type="number" step="0.01" id="rf-hb"></div>
+            <div class="field"><label>eGFR</label><input type="number" step="0.01" id="rf-egfr"></div>
+            <div class="field"><label>Cr</label><input type="number" step="0.01" id="rf-cr"></div>
+            <div class="field"><label>Alb</label><input type="number" step="0.01" id="rf-alb"></div>
+            <div class="field"><label>HbA1C</label><input type="number" step="0.01" id="rf-hba1c"></div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3><span class="n">4</span> Tourniquet (TQ)</h3>
+          <div class="grid grid-4">
+            <div class="field"><label>TQ (mmHg)</label><input type="number" step="0.1" id="rf-tq_mmhg"></div>
+            <div class="field"><label>TQ Start (HH:MM 24 ชม.)</label><input type="text" inputmode="numeric" maxlength="5" placeholder="เช่น 09:30" pattern="^([01][0-9]|2[0-3]):[0-5][0-9]$" id="rf-tq_start" oninput="maskTimeInput(this); updateDurationPreview('tq')"></div>
+            <div class="field"><label>TQ End (HH:MM 24 ชม.)</label><input type="text" inputmode="numeric" maxlength="5" placeholder="เช่น 11:05" pattern="^([01][0-9]|2[0-3]):[0-5][0-9]$" id="rf-tq_end" oninput="maskTimeInput(this); updateDurationPreview('tq')"></div>
+            <div class="field"><label>TQ Duration</label><input type="text" id="rf-tq-duration-preview" disabled placeholder="—"></div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3><span class="n">5</span> Alignment</h3>
+          <div class="grid grid-3">
+            <div class="field"><label>Extension lat (°)</label><input type="number" step="0.1" id="rf-extension_lag_deg"></div>
+            <div class="field"><label>Varus (°)</label><input type="number" step="0.1" id="rf-varus_deg"></div>
+            <div class="field"><label>Valgus (°)</label><input type="number" step="0.1" id="rf-valgus_deg"></div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3><span class="n">6</span> ระยะเวลาผ่าตัด</h3>
+          <div class="grid grid-4">
+            <div class="field"><label>เวลาเริ่มผ่าตัด (HH:MM 24 ชม.)</label><input type="text" inputmode="numeric" maxlength="5" placeholder="เช่น 09:30" pattern="^([01][0-9]|2[0-3]):[0-5][0-9]$" id="rf-surgery_start" oninput="maskTimeInput(this); updateDurationPreview('surgery')"></div>
+            <div class="field"><label>เวลาเสร็จผ่าตัด (HH:MM 24 ชม.)</label><input type="text" inputmode="numeric" maxlength="5" placeholder="เช่น 11:45" pattern="^([01][0-9]|2[0-3]):[0-5][0-9]$" id="rf-surgery_end" oninput="maskTimeInput(this); updateDurationPreview('surgery')"></div>
+            <div class="field"><label>ระยะเวลาผ่าตัด</label><input type="text" id="rf-surgery-duration-preview" disabled placeholder="—"></div>
+            <div class="field"><label>Debridement time (นาที)</label><input type="number" step="0.1" id="rf-debridement_time_min"></div>
+            <div class="field"><label>Suture time (นาที)</label><input type="number" step="0.1" id="rf-suture_time_min"></div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3><span class="n">7</span> Pulse (DP / TP)</h3>
+          <table class="pulse-grid">
+            <thead><tr><th></th><th colspan="2">Manual</th><th colspan="2">Digital</th></tr>
+            <tr><th></th><th>DP</th><th>TP</th><th>DP</th><th>TP</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Pre-op</td>
+                <td><select id="rf-pre_manual_dp"><option value="">-</option><option>คลำไม่ได้</option><option>1+</option><option>2+</option></select></td>
+                <td><select id="rf-pre_manual_tp"><option value="">-</option><option>คลำไม่ได้</option><option>1+</option><option>2+</option></select></td>
+                <td><select id="rf-pre_digital_dp"><option value="">-</option><option>คลำไม่ได้</option><option>1+</option><option>2+</option></select></td>
+                <td><select id="rf-pre_digital_tp"><option value="">-</option><option>คลำไม่ได้</option><option>1+</option><option>2+</option></select></td>
+              </tr>
+              <tr>
+                <td>Post-op</td>
+                <td><select id="rf-post_manual_dp"><option value="">-</option><option>คลำไม่ได้</option><option>1+</option><option>2+</option></select></td>
+                <td><select id="rf-post_manual_tp"><option value="">-</option><option>คลำไม่ได้</option><option>1+</option><option>2+</option></select></td>
+                <td><select id="rf-post_digital_dp"><option value="">-</option><option>คลำไม่ได้</option><option>1+</option><option>2+</option></select></td>
+                <td><select id="rf-post_digital_tp"><option value="">-</option><option>คลำไม่ได้</option><option>1+</option><option>2+</option></select></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="form-section">
+          <h3><span class="n">8</span> รูปภาพ</h3>
+          <div class="dropzone" onclick="document.getElementById('rf-file-input').click()">
+            📷 คลิกเพื่อเลือกรูปภาพ (เลือกได้หลายรูป) — หรือถ่ายรูปจากมือถือได้โดยตรง
+            <input type="file" id="rf-file-input" accept="image/*" multiple onchange="handleFileSelect(event)">
+          </div>
+          <div class="image-grid" id="existing-image-grid"></div>
+          <div class="image-grid" id="new-image-grid"></div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn" onclick="showView('list')">ยกเลิก</button>
+          <button type="submit" class="btn btn-primary" id="rf-save-btn">💾 บันทึก</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ===== DETAIL ===== -->
+    <section class="view" id="view-detail">
+      <div class="page-head">
+        <div><h1 id="detail-title">รายละเอียดผู้ป่วย</h1><p id="detail-sub"></p></div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn" onclick="window.print()">🖨 พิมพ์</button>
+          <button class="btn btn-accent role-gate gate-hidden" id="detail-edit-btn">✎ แก้ไข</button>
+          <button class="btn btn-danger admin-gate gate-hidden" id="detail-delete-btn">🗑 ลบ</button>
+        </div>
+      </div>
+      <div class="card card-pad" id="detail-body"></div>
+      <div class="card card-pad" id="detail-gallery-card" style="margin-top:16px;">
+        <h3 style="margin-top:0; font-size:15px;">รูปภาพ</h3>
+        <div class="gallery" id="detail-gallery"></div>
+        <div id="print-footer">TKA Registry — Patient Report</div>
+      </div>
+    </section>
+
+    <!-- ===== USERS (admin) ===== -->
+    <section class="view" id="view-users">
+      <div class="page-head">
+        <div><h1>ผู้ใช้งาน</h1><p>จัดการสิทธิ์ผู้ใช้งานในระบบ (Admin เท่านั้น)</p></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ชื่อ-สกุล</th><th>User ID</th><th>สมัครเมื่อ</th><th>สิทธิ์ (Role)</th></tr></thead>
+          <tbody id="users-tbody"><tr><td colspan="4"><div class="loading"><span class="spinner"></span> กำลังโหลด…</div></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toast"></div>
+<div id="lightbox" onclick="closeLightbox()"><button class="lb-close" onclick="closeLightbox()">✕</button><img id="lightbox-img"></div>
+
+<script>
+/* ============================================================
+   TKA REGISTRY — FIREBASE + GOOGLE DRIVE EDITION
+   Supabase is NOT used by this new project.
+   ============================================================ */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDv1AZHxGedlapeA0-WNsuw3xBt56zfav4",
+  authDomain: "tka-registry-firebase.firebaseapp.com",
+  projectId: "tka-registry-firebase",
+  storageBucket: "tka-registry-firebase.firebasestorage.app",
+  messagingSenderId: "781991892767",
+  appId: "1:781991892767:web:abcf4b664b7170ef08c22a",
+  measurementId: "G-9G273MV01Y"
+};
+
+// Google Apps Script Web App used ONLY for Google Drive images + Sheets backup.
+const GOOGLE_DRIVE_BACKUP_URL = 'https://script.google.com/macros/s/AKfycbxQnsenzEW42WT2w_uZ5ZBBrhzxNOaZkR7A-u9ejsprxlqgQuUEwph7w55OzURA43TXkA/exec';
+const GOOGLE_DRIVE_BACKUP_SECRET = 'My_Webhook_Secret_Is_260625_ORSMH';
+
+const IMAGE_TYPES = ['Pre-op','Intra-op','Post-op','X-ray','อื่นๆ'];
+const PULSE_FIELDS = ['pre_manual_dp','pre_manual_tp','pre_digital_dp','pre_digital_tp','post_manual_dp','post_manual_tp','post_digital_dp','post_digital_tp'];
+const FORM_FIELDS = ['hn','name_prefix','first_name','last_name','gender','age','weight_kg','height_cm','procedure','surgery_date',
+  'hct','hb','egfr','cr','alb','hba1c','tq_mmhg','tq_start','tq_end',
+  'extension_lag_deg','varus_deg','valgus_deg','surgery_start','surgery_end',
+  'debridement_time_min','suture_time_min', ...PULSE_FIELDS];
+
+let sb = null;
+let currentUser = null;
+let currentProfile = null;
+let pendingNewImages = [];
+let editingId = null;
+let listDebounceTimer = null;
+let firebase = null;
+
+/* ---------- small Firestore adapter so the existing UI can keep its flow ---------- */
+class FBQuery {
+  constructor(collectionName, action='read', payload=null){
+    this.collectionName=collectionName; this.action=action; this.payload=payload;
+    this.filters=[]; this._order=null; this._limit=null; this._count=false; this._select='*'; this._single=false; this._maybe=false;
+  }
+  select(fields='*', opts={}){ this._select=fields; this._count=!!opts.count; return this; }
+  eq(f,v){this.filters.push({op:'eq',f,v});return this}
+  gte(f,v){this.filters.push({op:'gte',f,v});return this}
+  lte(f,v){this.filters.push({op:'lte',f,v});return this}
+  ilike(f,v){this.filters.push({op:'ilike',f,v});return this}
+  or(expr){this._or=expr;return this}
+  order(f,opt={}){this._order={f,asc:opt.ascending!==false};return this}
+  limit(n){this._limit=n;return this}
+  range(a,b){this._range=[a,b];return this}
+  maybeSingle(){this._maybe=true;this._single=true;return this}
+  single(){this._single=true;return this}
+  then(resolve,reject){return this.run().then(resolve,reject)}
+  async run(){
+    try{
+      if(this.action==='insert'){
+        const data=this.payload.map(x=>({...x,id:x.id||crypto.randomUUID(),created_at:x.created_at||new Date().toISOString()}));
+        for(const row of data) await firebase.setDoc(firebase.doc(firebase.db,this.collectionName,row.id), row);
+        return {data:this._single?data[0]:data,error:null};
+      }
+      if(this.action==='update'){
+        const rows=await this._readRaw();
+        for(const row of rows) await firebase.updateDoc(firebase.doc(firebase.db,this.collectionName,row.id), this.payload);
+        return {data:null,error:null};
+      }
+      if(this.action==='delete'){
+        const rows=await this._readRaw();
+        for(const row of rows) await firebase.deleteDoc(firebase.doc(firebase.db,this.collectionName,row.id));
+        return {data:null,error:null};
+      }
+      let rows=await this._readRaw();
+      if(this._order) rows.sort((a,b)=> {
+        const av=a[this._order.f]??'', bv=b[this._order.f]??'';
+        return (av<bv?-1:av>bv?1:0)*(this._order.asc?1:-1);
+      });
+      if(this._range) rows=rows.slice(this._range[0],this._range[1]+1);
+      if(this._limit!=null) rows=rows.slice(0,this._limit);
+      if(this._single){
+        return {data:rows[0]||null,error:rows[0]?null:(this._maybe?null:{message:'ไม่พบข้อมูล'}),count:rows.length};
+      }
+      if(this._count){
+        rows=await Promise.all(rows.map(async r=>{
+          const imgs=await firebase.getDocs(firebase.query(firebase.collection(firebase.db,'record_images'),firebase.where('record_id','==',r.id)));
+          return {...r,record_images:[{count:imgs.size}]};
+        }));
+      }
+      return {data:rows,error:null,count:rows.length};
+    }catch(e){return {data:null,error:{message:e.message||String(e)},count:0}}
+  }
+  async _readRaw(){
+    let snap=await firebase.getDocs(firebase.collection(firebase.db,this.collectionName));
+    let rows=snap.docs.map(d=>({id:d.id,...d.data()}));
+    for(const f of this.filters){
+      rows=rows.filter(r=>{
+        const x=r[f.f];
+        if(f.op==='eq') return String(x??'')===String(f.v??'');
+        if(f.op==='gte') return String(x??'')>=String(f.v??'');
+        if(f.op==='lte') return String(x??'')<=String(f.v??'');
+        if(f.op==='ilike'){
+          const pat=String(f.v).replace(/^%|%$/g,'').toLowerCase();
+          return String(x??'').toLowerCase().includes(pat);
+        }
+        return true;
+      });
+    }
+    if(this._or){
+      const terms=this._or.split(',').map(x=>x.trim());
+      rows=rows.filter(r=>terms.some(t=>{
+        const m=t.match(/^(\w+)\.ilike\.%(.*)%$/); return m && String(r[m[1]]??'').toLowerCase().includes(m[2].toLowerCase());
+      }));
+    }
+    return rows;
+  }
+}
+
+function fbError(message){return {message};}
+const firebaseAdapter = {
+  async setDoc(ref,data,opts){ return firebase.setDoc(ref,data,opts||{}); },
+  doc: (...a)=>firebase.doc(...a),
+  collection: (...a)=>firebase.collection(...a),
+  query: (...a)=>firebase.query(...a),
+  where: (...a)=>firebase.where(...a),
+  getDocs: (...a)=>firebase.getDocs(...a),
+  updateDoc: (...a)=>firebase.updateDoc(...a),
+  deleteDoc: (...a)=>firebase.deleteDoc(...a)
+};
+
+const sbAdapter = {
+  from(table){
+    return {
+      select(fields='*',opts={}){return new FBQuery(table,'read').select(fields,opts)},
+      insert(rows){return new FBQuery(table,'insert',Array.isArray(rows)?rows:[rows])},
+      update(p){return new FBQuery(table,'update',p)},
+      delete(){return new FBQuery(table,'delete',{})}
+    };
+  },
+  rpc(name,args){
+    return (async()=>{
+      if(name==='lookup_login_email'){
+        const u=(args?.p_username||'').toLowerCase();
+        const q=await firebase.getDocs(firebase.query(firebase.collection(firebase.db,'login_lookup'),firebase.where('username_lower','==',u)));
+        return {data:q.empty?null:q.docs[0].data().email,error:null};
+      }
+      if(name==='username_exists'){
+        const u=(args?.p_username||'').toLowerCase();
+        const q=await firebase.getDocs(firebase.query(firebase.collection(firebase.db,'login_lookup'),firebase.where('username_lower','==',u)));
+        return {data:!q.empty,error:null};
+      }
+      return {data:null,error:fbError('ไม่รองรับ RPC: '+name)};
+    })();
+  },
+  auth:{
+    async signInWithPassword({email,password}){
+      try{const cred=await firebase.signInWithEmailAndPassword(firebase.auth,email,password); return {data:{user:cred.user},error:null}}
+      catch(e){return {data:null,error:e}}
+    },
+    async signUp({email,password,options}){
+      try{
+        const cred=await firebase.createUserWithEmailAndPassword(firebase.auth,email,password);
+        if(options?.data) await firebase.updateProfile(cred.user,{displayName:options.data.full_name||''});
+        return {data:{user:cred.user,session:null},error:null};
+      }catch(e){return {data:null,error:e}}
+    },
+    async signOut(){await firebase.signOut(firebase.auth);},
+    onAuthStateChange(cb){
+      return firebase.onAuthStateChanged(firebase.auth,u=>{
+        if(u) cb('SIGNED_IN',{user:u}); else cb('SIGNED_OUT',null);
+      });
+    }
+  },
+  storage:{
+    from(){
+      return {
+        async upload(path,file){
+          try{
+            const base64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(file)});
+            const resp=await fetch(GOOGLE_DRIVE_BACKUP_URL+'?key='+encodeURIComponent(GOOGLE_DRIVE_BACKUP_SECRET),{
+              method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+              body:JSON.stringify({kind:'image_upload',filename:file.name,mimeType:file.type,base64,folder:'TKA Registry/Patient Images'})
+            });
+            const j=await resp.json();
+            if(!resp.ok||j.ok===false) return {data:null,error:fbError(j.error||'อัปโหลดรูปไม่สำเร็จ')};
+            return {data:{path:'drive:'+j.file_id},error:null};
+          }catch(e){return {data:null,error:e}}
+        },
+        async remove(paths){ return {data:null,error:null}; },
+        async createSignedUrl(path){
+          const id=String(path).replace(/^drive:/,'');
+          return {data:{signedUrl:GOOGLE_DRIVE_BACKUP_URL+'?key='+encodeURIComponent(GOOGLE_DRIVE_BACKUP_SECRET)+'&kind=image&file_id='+encodeURIComponent(id)},error:null};
+        }
+      };
+    }
+  }
+};
+
+function configLooksPlaceholder(){ return !FIREBASE_CONFIG.apiKey || !FIREBASE_CONFIG.projectId; }
+
+window.addEventListener('DOMContentLoaded',()=>{
+  if(configLooksPlaceholder()){
+    document.getElementById('config-warning').style.display='block';
+    return;
+  }
+  const s=document.createElement('script');
+  s.type='module';
+  s.textContent=`import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js';
+import { getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,updateProfile } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js';
+import { getFirestore,collection,doc,setDoc,getDocs,query,where,updateDoc,deleteDoc } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js';
+const cfg=${JSON.stringify(FIREBASE_CONFIG)};
+const app=initializeApp(cfg); const auth=getAuth(app); const db=getFirestore(app);
+window.__fb={app,auth,db,collection,doc,setDoc,getDocs,query,where,updateDoc,deleteDoc,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,updateProfile,onAuthStateChanged};`;
+  document.head.appendChild(s);
+  const timer=setInterval(()=>{
+    if(window.__fb){
+      clearInterval(timer);
+      firebase=window.__fb;
+      sb=sbAdapter;
+      firebase.onAuthStateChanged(firebase.auth,u=>u?handleAuthed(u):showAuthScreen());
+    }
+  },50);
+});
+
+function restoreLastView(){
+  try{const last=localStorage.getItem('tka_last_view');if(['list','form','detail'].includes(last)&&currentUser)showView(last)}catch(e){}
+}
+
+
+function switchAuthTab(tab){
+  document.getElementById('tab-signin').classList.toggle('active', tab==='signin');
+  document.getElementById('tab-signup').classList.toggle('active', tab==='signup');
+  document.getElementById('signin-form').style.display = tab==='signin' ? 'block':'none';
+  document.getElementById('signup-form').style.display = tab==='signup' ? 'block':'none';
+  document.getElementById('auth-error').textContent = '';
+  document.getElementById('auth-msg').textContent = '';
+}
+
+
+
+function translateAuthError(msg){
+  if(/invalid login credentials/i.test(msg)) return 'Username หรือรหัสผ่านไม่ถูกต้อง';
+  if(/already registered/i.test(msg)) return 'อีเมลนี้ถูกใช้สมัครแล้ว';
+  if(/password/i.test(msg)) return 'รหัสผ่านไม่ถูกต้องตามเงื่อนไข (อย่างน้อย 6 ตัวอักษร)';
+  return msg;
+}
+
+
+
+function showAuthScreen(){
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app-shell').style.display = 'none';
+  currentUser = null; currentProfile = null;
+}
+
+
+
+function retryLoadProfile(){ loadProfileWithRetry(); }
+
+
+
+function applyRoleUI(){
+  // normalize กันเคส role เป็น 'Admin' / มีช่องว่างติดมา แล้วเทียบไม่ตรง
+  const rawRole = currentProfile?.role || null;
+  const role = rawRole ? String(rawRole).trim().toLowerCase() : null;
+  document.getElementById('user-role-badge').textContent = rawRole || '?';
+  document.querySelectorAll('.role-gate').forEach(el => {
+    el.classList.toggle('gate-hidden', !(role === 'admin' || role === 'staff'));
+  });
+  document.querySelectorAll('.admin-gate').forEach(el => {
+    el.classList.toggle('gate-hidden', role !== 'admin');
+  });
+  document.getElementById('nav-users-btn').classList.toggle('hidden', role !== 'admin');
+  document.getElementById('bn-users-btn').classList.toggle('hidden', role !== 'admin');
+  // ปุ่ม "ตั้งเป็นแอดมิน" โชว์ให้ทุกคนที่ยังไม่ใช่ admin กด (ฟังก์ชันฝั่ง DB จะเช็คเองว่ามี admin แล้วหรือยัง)
+  document.getElementById('claim-admin-btn').style.display = (role !== 'admin') ? '' : 'none';
+}
+
+/* ---------------- NAV ---------------- */
+
+
+
+function renderPatientDetailGrouped(rec){
+  const body = document.getElementById('detail-body');
+  if(!body) return;
+
+  const groups = [
+    {
+      title: '1. ข้อมูลผู้ป่วย',
+      fields: [
+        ['hn','HN'],['name_prefix','คำนำหน้า'],['first_name','ชื่อ'],['last_name','นามสกุล'],
+        ['gender','เพศ'],['age','อายุ'],['weight_kg','น้ำหนัก (กก.)'],['height_cm','ส่วนสูง (ซม.)'],['bmi','BMI'],
+        ['procedure','Procedure'],['surgery_date','วันที่ผ่าตัด']
+      ]
+    },
+    {
+      title: '2. LAB',
+      fields: [
+        ['hct','Hct'],['hb','Hb'],['egfr','eGFR'],['cr','Cr'],['alb','Alb'],['hba1c','HbA1C']
+      ]
+    },
+    {
+      title: '3. Tourniquet (TQ)',
+      fields: [
+        ['tq_mmhg','TQ (mmHg)'],['tq_start','TQ Start'],['tq_end','TQ End'],['tq_duration_min','TQ Duration']
+      ]
+    },
+    {
+      title: '4. Alignment',
+      fields: [
+        ['extension_lag_deg','Extension lat (°)'],['varus_deg','Varus (°)'],['valgus_deg','Valgus (°)']
+      ]
+    },
+    {
+      title: '5. เวลาและระยะเวลาผ่าตัด',
+      fields: [
+        ['surgery_start','เวลาเริ่มผ่าตัด'],['surgery_end','เวลาเสร็จผ่าตัด'],
+        ['surgery_duration_min','ระยะเวลาผ่าตัด'],['debridement_time_min','Debridement time'],
+        ['suture_time_min','Suture time']
+      ]
+    },
+    {
+      title: '6. Pulse',
+      fields: [
+        ['pre_manual_dp','Pre-op Manual DP'],['pre_manual_tp','Pre-op Manual TP'],
+        ['pre_digital_dp','Pre-op Digital DP'],['pre_digital_tp','Pre-op Digital TP'],
+        ['post_manual_dp','Post-op Manual DP'],['post_manual_tp','Post-op Manual TP'],
+        ['post_digital_dp','Post-op Digital DP'],['post_digital_tp','Post-op Digital TP']
+      ]
+    },
+    {
+      title: '7. รูปภาพ',
+      fields: []
+    }
+  ];
+
+  const valueFor = (key) => {
+    const v = rec?.[key];
+    if(v === null || v === undefined || v === '') return '—';
+    if(key === 'surgery_date' && typeof formatDate === 'function') return formatDate(v);
+    if(['tq_start','tq_end','surgery_start','surgery_end'].includes(key)) return String(v).slice(0,5);
+    if(['tq_duration_min','surgery_duration_min'].includes(key) && typeof formatDuration === 'function') return formatDuration(v);
+    return String(v);
+  };
+
+  body.innerHTML = groups.map((g, i) => `
+    <section class="patient-detail-group">
+      <div class="patient-detail-group-title">${g.title}</div>
+      ${g.fields.length ? `<div class="patient-detail-group-body">
+        ${g.fields.map(([key,label]) => `
+          <div class="patient-detail-item">
+            <div class="label">${label}</div>
+            <div class="value">${escapeHtml(valueFor(key))}</div>
+          </div>
+        `).join('')}
+      </div>` : `<div class="patient-detail-group-body" id="detail-images-group"></div>`}
+    </section>
+  `).join('');
+
+  // Reuse the existing image renderer if present.
+  if(typeof renderDetailImages === 'function') renderDetailImages(rec);
+}
+
+
+
+function showView(name){
+  try{ localStorage.setItem('tka_last_view', name); }catch(e){}
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('.nav-tabs button, #bottom-nav button').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+  window.scrollTo(0,0);
+  if(name === 'dashboard') loadDashboard();
+  if(name === 'list') loadList();
+    restoreLastView();
+  if(name === 'users') loadUsers();
+}
+
+
+
+function showToast(msg, isErr){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = isErr ? 'show err' : 'show';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+/* ---------------- DASHBOARD ---------------- */
+
+
+function debouncedLoadList(){
+  clearTimeout(listDebounceTimer);
+  listDebounceTimer = setTimeout(loadList, 350);
+}
+
+
+
+function clearFilters(){
+  document.getElementById('f-search').value = '';
+  document.getElementById('f-procedure').value = '';
+  document.getElementById('f-date-from').value = '';
+  document.getElementById('f-date-to').value = '';
+  loadList();
+}
+
+
+
+async function loadList(){
+  const tbody = document.getElementById('list-tbody');
+  tbody.innerHTML = `<tr><td colspan="7"><div class="loading"><span class="spinner"></span> กำลังโหลดข้อมูล…</div></td></tr>`;
+  const { data, error, count } = await buildListQuery();
+  if(error){ tbody.innerHTML = `<tr><td colspan="7"><div class="empty-note">โหลดข้อมูลไม่สำเร็จ: ${error.message}</div></td></tr>`; return; }
+  if(!data || data.length === 0){ tbody.innerHTML = `<tr><td colspan="7"><div class="empty-note">ไม่พบข้อมูล</div></td></tr>`; document.getElementById('list-count').textContent=''; return; }
+  tbody.innerHTML = data.map(r => `
+    <tr onclick="viewDetail('${r.id}')" style="cursor:pointer">
+      <td class="hn-cell" data-label="HN">${escapeHtml(r.hn||'-')}</td>
+      <td data-label="ชื่อ-สกุล">${escapeHtml(getPatientFullName(r))}</td>
+      <td data-label="Procedure">${procedureTag(r.procedure)}</td>
+      <td data-label="วันที่ผ่าตัด">${formatDate(r.surgery_date)}</td>
+      <td class="mono" data-label="BMI">${r.bmi ?? '—'}</td>
+      <td data-label="รูป">${(r.record_images?.[0]?.count) || 0} 🖼️</td>
+      <td class="row-actions" data-label="" onclick="event.stopPropagation()">
+        <button class="btn btn-sm" onclick="viewDetail('${r.id}')">ดู</button>
+      </td>
+    </tr>
+  `).join('');
+  document.getElementById('list-count').textContent = `พบ ${count ?? data.length} รายการ${(count && count>300)?' (แสดง 300 รายการล่าสุด — ใช้ตัวกรองเพื่อค้นหาให้แคบลง)':''}`;
+}
+
+
+
+function procedureTag(p){
+  if(p === 'TKA Rt.') return `<span class="tag tag-rt">TKA Rt.</span>`;
+  if(p === 'TKA Lt.') return `<span class="tag tag-lt">TKA Lt.</span>`;
+  if(p === 'Bilat TKA') return `<span class="tag tag-bilat">Bilat TKA</span>`;
+  return '—';
+}
+
+
+function formatDate(d){
+  if(!d) return '—';
+  const dt = new Date(d + 'T00:00:00');
+  return dt.toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' });
+}
+
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------------- FORM (add/edit) ---------------- */
+
+
+function updateBMIPreview(){
+  const w = parseFloat(document.getElementById('rf-weight_kg').value);
+  const h = parseFloat(document.getElementById('rf-height_cm').value);
+  const el = document.getElementById('rf-bmi-preview');
+  if(w>0 && h>0){ el.value = (w / Math.pow(h/100,2)).toFixed(2); } else { el.value=''; }
+}
+
+
+
+function timeDiffMinutes(start, end){
+  if(!start || !end) return null;
+  if(!/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(start) || !/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(end)) return null;
+  const [sh,sm] = start.split(':').map(Number);
+  const [eh,em] = end.split(':').map(Number);
+  let mins = (eh*60+em) - (sh*60+sm);
+  if(mins < 0) mins += 24*60;
+  return mins;
+}
+
+
+function maskTimeInput(el){
+  // พิมพ์เลขล้วน แล้วจัดรูปแบบเป็น HH:MM (24 ชม.) ให้อัตโนมัติ ไม่ขึ้นกับ locale เครื่อง
+  let digits = el.value.replace(/\D/g,'').slice(0,4);
+  if(digits.length >= 3) el.value = digits.slice(0,2) + ':' + digits.slice(2);
+  else el.value = digits;
+}
+
+
+function formatDuration(mins){
+  if(mins === null || mins === undefined || mins === '') return '—';
+  const m = Math.round(Number(mins));
+  if(isNaN(m) || m < 0) return '—';
+  const h = Math.floor(m/60), r = m%60;
+  return `${String(h).padStart(2,'0')}:${String(r).padStart(2,'0')} ชม.`;
+}
+
+
+
+function getPatientFullName(record){
+  const parts = [record.name_prefix, record.first_name, record.last_name]
+    .map(v => (v ?? '').toString().trim())
+    .filter(Boolean);
+  return parts.join(' ') || record.full_name || record.hn || '-';
+}
+
+
+
+function formatClockTime(v){
+  if(!v) return '—';
+  const s = String(v).slice(0,5);
+  return /^\d{2}:\d{2}$/.test(s) ? s : String(v);
+}
+
+
+
+function formatDetailValue(key, value){
+  if(value === null || value === undefined || value === '') return '—';
+  if(key === 'surgery_date') return formatDate(value);
+  if(key === 'tq_start' || key === 'tq_end' || key === 'surgery_start' || key === 'surgery_end') return formatClockTime(value);
+  if(key === 'tq_duration_min' || key === 'surgery_duration_min') return formatDuration(value);
+  if(key === 'extension_lag_deg' || key === 'varus_deg' || key === 'valgus_deg') return `${value} °`;
+  if(key === 'debridement_time_min' || key === 'suture_time_min') return `${value} นาที`;
+  return String(value);
+}
+
+
+function updateDurationPreview(which){
+  if(which === 'tq'){
+    const m = timeDiffMinutes(document.getElementById('rf-tq_start').value, document.getElementById('rf-tq_end').value);
+    document.getElementById('rf-tq-duration-preview').value = m===null ? '' : formatDuration(m);
+  } else {
+    const m = timeDiffMinutes(document.getElementById('rf-surgery_start').value, document.getElementById('rf-surgery_end').value);
+    document.getElementById('rf-surgery-duration-preview').value = m===null ? '' : formatDuration(m);
+  }
+}
+
+
+
+function resetForm(){
+  editingId = null;
+  document.getElementById('rf-id').value = '';
+  FORM_FIELDS.forEach(f => { const el = document.getElementById('rf-'+f); if(el) el.value=''; });
+  document.getElementById('rf-bmi-preview').value = '';
+  document.getElementById('rf-tq-duration-preview').value = '';
+  document.getElementById('rf-surgery-duration-preview').value = '';
+  pendingNewImages = [];
+  document.getElementById('new-image-grid').innerHTML = '';
+  document.getElementById('existing-image-grid').innerHTML = '';
+}
+
+
+
+function renderExistingImages(images){
+  const grid = document.getElementById('existing-image-grid');
+  if(images.length === 0){ grid.innerHTML=''; return; }
+  grid.innerHTML = images.map(img => `
+    <div class="image-card" data-image-id="${img.id}">
+      <img class="thumb" src="${getPublicOrSignedUrlPlaceholder()}" data-path="${img.file_path}" onclick="openLightboxByPath('${img.file_path}')" alt="">
+      <div class="meta">
+        <div style="font-size:11px; color:var(--ink-soft); margin-bottom:4px;">${escapeHtml(img.image_type||'อื่นๆ')}</div>
+        <div style="font-size:11px; color:var(--ink-faint);">${escapeHtml(img.description||'')}</div>
+        <button type="button" class="btn btn-sm btn-danger rm admin-gate gate-hidden" onclick="deleteExistingImage('${img.id}','${img.file_path}')">ลบรูปนี้</button>
+      </div>
+    </div>
+  `).join('');
+  applyRoleUI();
+  images.forEach(img => loadSignedThumbnail(img.file_path));
+}
+
+
+
+function getPublicOrSignedUrlPlaceholder(){
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="150" height="110"><rect width="100%" height="100%" fill="%23EFF3F2"/></svg>');
+}
+
+
+
+function cssEscape(s){ return String(s).replace(/["\\]/g,'\\$&'); }
+
+
+
+function handleFileSelect(e){
+  const files = Array.from(e.target.files || []);
+  files.forEach(file => {
+    const previewUrl = URL.createObjectURL(file);
+    pendingNewImages.push({ file, previewUrl, type: 'Pre-op', description: '' });
+  });
+  e.target.value = '';
+  renderNewImages();
+}
+
+
+
+function renderNewImages(){
+  const grid = document.getElementById('new-image-grid');
+  grid.innerHTML = pendingNewImages.map((item, idx) => `
+    <div class="image-card">
+      <img class="thumb" src="${item.previewUrl}" alt="">
+      <div class="meta">
+        <select onchange="pendingNewImages[${idx}].type=this.value">
+          ${IMAGE_TYPES.map(t => `<option ${t===item.type?'selected':''}>${t}</option>`).join('')}
+        </select>
+        <input type="text" placeholder="คำอธิบาย (ไม่บังคับ)" oninput="pendingNewImages[${idx}].description=this.value">
+        <button type="button" class="btn btn-sm rm" onclick="removePendingImage(${idx})">เอาออก</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+
+function removePendingImage(idx){ pendingNewImages.splice(idx,1); renderNewImages(); }
+
+
+
+function closeLightbox(){ document.getElementById('lightbox').style.display = 'none'; }
+
+
+
+
+async function exportCSV(){
+  showToast('กำลังเตรียมไฟล์ CSV…');
+  const { data, error } = await buildListQuery().limit(10000);
+  if(error){ showToast('Export ไม่สำเร็จ: ' + error.message, true); return; }
+  if(!data || data.length===0){ showToast('ไม่มีข้อมูลให้ export', true); return; }
+
+  const { data: full, error: e2 } = await sb.from('records').select('*').in('id', data.map(r=>r.id));
+  if(e2){ showToast('Export ไม่สำเร็จ: ' + e2.message, true); return; }
+
+  const cols = ['hn','name_prefix','first_name','last_name','full_name','gender','age','weight_kg','height_cm','bmi','procedure','surgery_date',
+    'hct','hb','egfr','cr','alb','hba1c','tq_mmhg','tq_start','tq_end','tq_duration_min',
+    'extension_lag_deg','varus_deg','valgus_deg','surgery_start','surgery_end','surgery_duration_min',
+    'debridement_time_min','suture_time_min', ...PULSE_FIELDS];
+  const header = cols.map(c => DETAIL_LABELS[c] || c);
+  const rows = full.map(r => cols.map(c => csvEscape(r[c])));
+  const csv = '\uFEFF' + [header, ...rows].map(row => row.join(',')).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `tka_registry_export_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  showToast(`Export สำเร็จ (${full.length} รายการ)`);
+}
+
+
+function csvEscape(v){
+  if(v === null || v === undefined) return '';
+  const s = String(v);
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+}
+
+/* ---------------- USERS (admin) ---------------- */
+
+
+async function handleSignIn(e){
+ e.preventDefault(); const errEl=document.getElementById('auth-error'); errEl.textContent='';
+ const btn=document.getElementById('si-btn'); btn.disabled=true; btn.textContent='กำลังเข้าสู่ระบบ…';
+ const username=document.getElementById('si-email').value.trim(), password=document.getElementById('si-password').value;
+ if(!/^[A-Za-z][A-Za-z0-9._-]{2,31}$/.test(username)){errEl.textContent='Username ต้องเป็นภาษาอังกฤษเท่านั้น และยาว 3–32 ตัวอักษร';btn.disabled=false;btn.textContent='เข้าสู่ระบบ';return false;}
+ const email=username.toLowerCase()+'@tka-registry.local';
+ const {error}=await sb.auth.signInWithPassword({email,password});
+ btn.disabled=false;btn.textContent='เข้าสู่ระบบ'; if(error) errEl.textContent='Username หรือรหัสผ่านไม่ถูกต้อง'; return false;
+}
+
+async function handleSignUp(e){
+ e.preventDefault(); const err=document.getElementById('auth-error'); const msg=document.getElementById('auth-msg'); err.textContent='';msg.textContent='';
+ const btn=document.getElementById('su-btn');btn.disabled=true;btn.textContent='กำลังสมัคร…';
+ const full_name=document.getElementById('su-name').value.trim(),username=document.getElementById('su-username').value.trim(),email=document.getElementById('su-email').value.trim(),password=document.getElementById('su-password').value;
+ if(!/^[A-Za-z][A-Za-z0-9._-]{2,31}$/.test(username)){err.textContent='Username ต้องเป็นภาษาอังกฤษเท่านั้น และยาว 3–32 ตัวอักษร';btn.disabled=false;btn.textContent='สมัครสมาชิก';return false;}
+ const {data:exists}=await sb.rpc('username_exists',{p_username:username}); if(exists){err.textContent='Username นี้ถูกใช้แล้ว';btn.disabled=false;btn.textContent='สมัครสมาชิก';return false;}
+ const authEmail=username.toLowerCase()+'@tka-registry.local';
+ const {data,error}=await sb.auth.signUp({email:authEmail,password,options:{data:{full_name,username,contact_email:email}}});
+ if(error){err.textContent=translateAuthError(error.message||'สมัครสมาชิกไม่สำเร็จ');btn.disabled=false;btn.textContent='สมัครสมาชิก';return false;}
+ if(data?.user){
+   const now=new Date().toISOString();
+   await sb.from('profiles').insert({id:data.user.uid||data.user.id,email,username,full_name,role:'admin',created_at:now});
+   await sb.from('login_lookup').insert({id:username.toLowerCase(),username,username_lower:username.toLowerCase(),email,uid:data.user.uid||data.user.id,created_at:now});
+ }
+ msg.textContent='สมัครสมาชิกสำเร็จ — สามารถเข้าสู่ระบบด้วย Username ได้';
+ btn.disabled=false;btn.textContent='สมัครสมาชิก';return false;
+}
+
+async function handleSignOut(){await sb.auth.signOut();showAuthScreen();}
+
+async function changeUsername(){
+ const current=(currentProfile?.username||'').trim(),u=prompt('ตั้ง Username ใหม่ (ภาษาอังกฤษเท่านั้น)',current); if(u===null)return;
+ const n=u.trim();if(!/^[A-Za-z][A-Za-z0-9._-]{2,31}$/.test(n)){showToast('Username ต้องเป็นภาษาอังกฤษเท่านั้น และยาว 3–32 ตัวอักษร',true);return;}
+ const {data:exists}=await sb.rpc('username_exists',{p_username:n});if(exists){showToast('Username นี้ถูกใช้แล้ว',true);return;}
+ await sb.from('login_lookup').delete().eq('id',current.toLowerCase());
+ await sb.from('login_lookup').insert({id:n.toLowerCase(),username:n,username_lower:n.toLowerCase(),email:currentUser.email,uid:currentUser.id,created_at:new Date().toISOString()});
+ await sb.from('profiles').update({username:n}).eq('id',currentUser.id);
+ currentProfile.username=n;showToast('เปลี่ยน Username แล้ว');applyRoleUI();
+}
+
+async function handleAuthed(user){
+ currentUser={id:user.uid||user.id,email:user.email,user_metadata:{username:''},user};
+ await loadProfileWithRetry();
+ if(!currentProfile){showAuthScreen();return;}
+ document.getElementById('auth-screen').style.display='none';document.getElementById('app-shell').style.display='block';
+ restoreLastView();loadDashboard();loadList();
+}
+
+async function loadProfileWithRetry(){
+ const loading=document.getElementById('role-loading-banner'),err=document.getElementById('role-error-banner');if(loading)loading.style.display='flex';if(err)err.style.display='none';
+ const {data,error}=await sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
+ if(loading)loading.style.display='none';
+ if(data){currentProfile=data;currentUser.user_metadata.username=data.username||'';applyRoleUI();return;}
+ if(err)err.style.display='flex';currentProfile=null;applyRoleUI();
+}
+
+function buildListQuery(){
+ const search=document.getElementById('f-search').value.trim().toLowerCase(),proc=document.getElementById('f-procedure').value,from=document.getElementById('f-date-from').value,to=document.getElementById('f-date-to').value;
+ let q=sb.from('records').select('id,hn,name_prefix,first_name,last_name,full_name,procedure,surgery_date,bmi,record_images(count)',{count:'exact'});
+ if(search)q._or=`hn.ilike.%${search}%,name_prefix.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%,full_name.ilike.%${search}%`;
+ if(proc)q=q.eq('procedure',proc);if(from)q=q.gte('surgery_date',from);if(to)q=q.lte('surgery_date',to);
+ return q.order('surgery_date',{ascending:false}).limit(300);
+}
+
+async function loadDashboard(){
+ const strip=document.getElementById('vitals-strip'),chart=document.getElementById('monthly-chart');
+ const {data}=await sb.from('records').select('*');const rows=data||[];
+ const avg=rows.length?rows.reduce((a,r)=>a+(parseFloat(r.bmi)||0),0)/rows.filter(r=>r.bmi).length:0;
+ const durations=rows.map(r=>parseFloat(r.surgery_duration_min)).filter(Boolean),avgDur=durations.length?durations.reduce((a,b)=>a+b,0)/durations.length:null;
+ const rt=rows.filter(r=>String(r.procedure||'').toLowerCase().includes('rt')).length,lt=rows.filter(r=>String(r.procedure||'').toLowerCase().includes('lt')).length;
+ strip.innerHTML=`<div class="vital"><div class="label">ทั้งหมด</div><div class="num">${rows.length}<span class="unit">เคส</span></div></div><div class="vital alt"><div class="label">TKA Rt.</div><div class="num">${rt}</div></div><div class="vital alt"><div class="label">TKA Lt.</div><div class="num">${lt}</div></div><div class="vital alt"><div class="label">Bilat TKA</div><div class="num">${rows.filter(r=>String(r.procedure||'').toLowerCase().includes('bilat')).length}</div></div><div class="vital"><div class="label">BMI เฉลี่ย</div><div class="num">${avg?avg.toFixed(1):'—'}</div></div><div class="vital"><div class="label">เวลาผ่าตัดเฉลี่ย</div><div class="num" style="font-size:20px;">${formatDuration(avgDur)}</div></div>`;
+ const months={};rows.filter(r=>r.surgery_date).forEach(r=>{const m=String(r.surgery_date).slice(0,7);months[m]=(months[m]||0)+1});const monthly=Object.entries(months).sort();
+ if(!monthly.length){chart.innerHTML='<div class="empty-note">ยังไม่มีข้อมูลผ่าตัดที่มีวันที่ระบุ</div>';return}
+ const max=Math.max(...monthly.map(x=>x[1]),1);chart.innerHTML='<div class="bars">'+monthly.slice(-12).map(([m,n])=>`<div class="bar-col"><div class="bar-val">${n}</div><div class="bar" style="height:${Math.max(6,n/max*120)}px"></div><div class="bar-lbl">${m}</div></div>`).join('')+'</div>';
+}
+
+async function openForm(recordId){
+ resetForm();document.getElementById('form-title').textContent=recordId?'แก้ไขข้อมูลผู้ป่วย':'เพิ่มข้อมูลผู้ป่วย';showView('form');
+ if(recordId){editingId=recordId;document.getElementById('rf-id').value=recordId;const {data:rec,error}=await sb.from('records').select('*').eq('id',recordId).single();if(error){showToast('โหลดข้อมูลไม่สำเร็จ: '+error.message,true);return}
+ const TF=['tq_start','tq_end','surgery_start','surgery_end'];FORM_FIELDS.forEach(f=>{const el=document.getElementById('rf-'+f);if(el&&rec[f]!=null)el.value=TF.includes(f)?String(rec[f]).slice(0,5):rec[f]});updateBMIPreview();updateDurationPreview('tq');updateDurationPreview('surgery');
+ const {data:images}=await sb.from('record_images').select('*').eq('record_id',recordId).order('created_at');renderExistingImages(images||[]);}
+}
+
+async function saveRecord(e){
+ e.preventDefault();const btn=document.getElementById('rf-save-btn');btn.disabled=true;btn.textContent='กำลังบันทึก…';
+ try{
+  const payload={};FORM_FIELDS.forEach(f=>{const el=document.getElementById('rf-'+f);if(el)payload[f]=el.value===''?null:el.value});if(!payload.hn)throw new Error('กรุณากรอก HN');payload.full_name=getPatientFullName(payload);
+  let recordId=editingId;
+  if(editingId){payload.updated_by=currentUser.id;const {error}=await sb.from('records').update(payload).eq('id',editingId);if(error)throw error}
+  else{payload.created_by=currentUser.id;const {data,error}=await sb.from('records').insert(payload).select('id').single();if(error)throw error;recordId=data.id}
+  for(const item of pendingNewImages){
+   const ext=(item.file.name.split('.').pop()||'jpg').toLowerCase(),path='drive:'+crypto.randomUUID();
+   const up=await sb.storage.from('tka-images').upload(path,item.file);if(up.error)throw up.error;
+   const driveId=up.data.path.replace(/^drive:/,'');
+   const {error}=await sb.from('record_images').insert({record_id:recordId,file_path:'drive:'+driveId,image_type:item.type,description:item.description||null,uploaded_by:currentUser.id,drive_file_id:driveId,created_at:new Date().toISOString()});if(error)throw error;
+  }
+  showToast('บันทึกข้อมูลเรียบร้อย');pendingNewImages=[];viewDetail(recordId);
+ }catch(err){showToast('บันทึกไม่สำเร็จ: '+err.message,true)}finally{btn.disabled=false;btn.textContent='💾 บันทึก'}return false;
+}
+
+async function viewDetail(id){
+ showView('detail');document.getElementById('detail-body').innerHTML='<div class="loading"><span class="spinner"></span> กำลังโหลดข้อมูล…</div>';document.getElementById('detail-gallery').innerHTML='';
+ const {data:rec,error}=await sb.from('records').select('*').eq('id',id).single();if(error){document.getElementById('detail-body').innerHTML='<div class="empty-note">'+escapeHtml(error.message)+'</div>';return}
+ document.getElementById('detail-title').textContent=getPatientFullName(rec);document.getElementById('detail-sub').textContent=`HN ${rec.hn} · ${rec.procedure||'-'} · ${formatDate(rec.surgery_date)}`;
+ renderPatientDetailGrouped(rec);document.getElementById('detail-edit-btn').onclick=()=>openForm(id);document.getElementById('detail-delete-btn').onclick=()=>deleteRecord(id);applyRoleUI();
+ const {data:images}=await sb.from('record_images').select('*').eq('record_id',id).order('created_at');const gallery=document.getElementById('detail-gallery');if(!images?.length){gallery.innerHTML='<div class="empty-note">ยังไม่มีรูปภาพ</div>';return}
+ gallery.innerHTML=images.map(img=>`<div><img data-path="${escapeHtml(img.file_path)}" src="${getPublicOrSignedUrlPlaceholder()}" onclick="openLightboxByPath('${String(img.file_path).replace(/'/g,"\\'")}')" alt=""><div class="gcap">${escapeHtml(img.image_type||'')}</div></div>`).join('');images.forEach(img=>loadSignedThumbnail(img.file_path));
+}
+
+async function deleteRecord(id){
+ if(!confirm('ยืนยันการลบข้อมูลผู้ป่วยรายนี้? การลบไม่สามารถย้อนกลับได้'))return;
+ const {error}=await sb.from('records').delete().eq('id',id);if(error){showToast('ลบไม่สำเร็จ: '+error.message,true);return}
+ showToast('ลบข้อมูลแล้ว');showView('list');
+}
+
+async function loadSignedThumbnail(path){const {data}=await sb.storage.from('tka-images').createSignedUrl(path,3600);if(data)document.querySelectorAll(`img[data-path="${cssEscape(path)}"]`).forEach(img=>img.src=data.signedUrl)}
+
+async function loadUsers(){
+ const tbody=document.getElementById('users-tbody');tbody.innerHTML='<tr><td colspan="4"><div class="loading"><span class="spinner"></span> กำลังโหลด…</div></td></tr>';
+ const {data,error}=await sb.from('profiles').select('*').order('created_at',{ascending:false});if(error){tbody.innerHTML='<tr><td colspan="4"><div class="empty-note">'+escapeHtml(error.message)+'</div></td></tr>';return}
+ tbody.innerHTML=(data||[]).map(u=>`<tr><td>${escapeHtml(u.full_name||'-')}</td><td class="mono" style="font-size:11px;color:var(--ink-faint);">${escapeHtml(u.id)}</td><td>${formatDate((u.created_at||'').slice(0,10))}</td><td><select onchange="updateUserRole('${u.id}',this.value)" ${u.id===currentUser.id?'disabled':''}><option value="viewer" ${u.role==='viewer'?'selected':''}>viewer</option><option value="staff" ${u.role==='staff'?'selected':''}>staff</option><option value="admin" ${u.role==='admin'?'selected':''}>admin</option></select></td></tr>`).join('');
+}
+
+async function updateUserRole(userId,role){const {error}=await sb.from('profiles').update({role}).eq('id',userId);if(error){showToast('เปลี่ยนสิทธิ์ไม่สำเร็จ: '+error.message,true);return}showToast('เปลี่ยนสิทธิ์แล้ว');if(userId===currentUser.id){currentProfile.role=role;applyRoleUI()}}
+
+async function syncPostToGoogle(payload){
+ const res=await fetch(GOOGLE_DRIVE_BACKUP_URL+'?key='+encodeURIComponent(GOOGLE_DRIVE_BACKUP_SECRET),{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+ if(!res.ok)throw new Error('Google Apps Script HTTP '+res.status);return res;
+}
+
+async function claimAdmin(){
+ const btn=document.getElementById('claim-admin-btn');btn.disabled=true;btn.textContent='กำลังตั้งค่า…';
+ const {data}=await sb.from('profiles').select('*');
+ const hasAdmin=(data||[]).some(p=>String(p.role||'').toLowerCase()==='admin');
+ if(hasAdmin){showToast('มีแอดมินอยู่แล้วในระบบ กรุณาติดต่อแอดมิน',true);btn.style.display='none';}
+ else{await sb.from('profiles').update({role:'admin'}).eq('id',currentUser.id);await loadProfileWithRetry();showToast('ตั้งเป็นแอดมินเรียบร้อย');}
+ btn.disabled=false;btn.textContent='ตั้งเป็นแอดมิน';
+}
+
+async function deleteExistingImage(imageId,filePath){
+ if(!confirm('ลบรูปนี้ใช่หรือไม่?'))return;
+ const {data:imageBefore}=await sb.from('record_images').select('*').eq('id',imageId).maybeSingle();
+ const {error}=await sb.from('record_images').delete().eq('id',imageId);if(error){showToast('ลบรูปไม่สำเร็จ: '+error.message,true);return}
+ if(imageBefore)syncPostToGoogle({kind:'image_delete',record:{id:imageBefore.id}}).catch(()=>{});
+ document.querySelector(`[data-image-id="${imageId}"]`)?.remove();showToast('ลบรูปแล้ว');
+}
+
+async function openLightboxByPath(path){
+ const {data,error}=await sb.storage.from('tka-images').createSignedUrl(path,3600);
+ if(error){showToast('เปิดรูปไม่สำเร็จ: '+error.message,true);return}
+ document.getElementById('lightbox-img').src=data.signedUrl;document.getElementById('lightbox').style.display='flex';
+}
+
+async function syncAllToGoogleSheets(){
+ if(!currentUser){showToast('กรุณา Login ก่อน',true);return} if(currentProfile?.role!=='admin'){showToast('เฉพาะ Admin เท่านั้น',true);return}
+ if(!confirm('สำรองข้อมูลที่มีอยู่ทั้งหมดไป Google Sheets ตอนนี้ใช่หรือไม่?'))return;
+ const btn=document.getElementById('sync-google-btn');if(btn){btn.disabled=true;btn.textContent='☁ กำลังสำรอง…'}
+ try{
+  let total=0;for(const table of ['records','profiles','record_images']){const {data,error}=await sb.from(table).select('*').limit(10000);if(error)throw new Error(table+': '+error.message);for(const row of data||[]){await syncPostToGoogle({type:'INSERT',table,schema:'firebase',record:row,old_record:null});total++}}
+  showToast(`สำรองข้อมูลแล้ว ${total} รายการ`);
+ }catch(e){showToast('สำรองไม่สำเร็จ: '+e.message,true)}finally{if(btn){btn.disabled=false;btn.textContent='☁ สำรองไป Google Sheets'}}
+}
+
+</script>
+</body>
+</html>
+
+<script>
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden){
+    try{
+      const last = localStorage.getItem('tka_last_view');
+      if(last && ['list','form','detail'].includes(last) && currentUser) showView(last);
+    }catch(e){}
+  }
+});
+</script>
