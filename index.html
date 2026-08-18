@@ -743,7 +743,7 @@ tbody tr:last-child td{border-bottom:none;}
 </div>
 
 <div id="toast"></div>
-<div id="lightbox" onclick="closeLightbox()"><button class="lb-close" onclick="closeLightbox()">✕</button><img id="lightbox-img"></div>
+<div id="lightbox" onclick="closeLightbox()"><button class="lb-close" onclick="closeLightbox()">✕</button><img id="lightbox-img" alt=""></div>
 
 <script>
 /* ============================================================
@@ -770,6 +770,18 @@ const FORM_FIELDS = ['hn','name_prefix','first_name','last_name','gender','age',
   'hct','hb','egfr','cr','alb','hba1c','tq_mmhg','tq_start','tq_end',
   'extension_lag_deg','varus_deg','valgus_deg','surgery_start','surgery_end',
   'debridement_time_min','suture_time_min', ...PULSE_FIELDS];
+
+const DETAIL_LABELS = {
+  hn:'HN', name_prefix:'คำนำหน้า', first_name:'ชื่อ', last_name:'นามสกุล', full_name:'ชื่อ-สกุล',
+  gender:'เพศ', age:'อายุ', weight_kg:'น้ำหนัก (กก.)', height_cm:'ส่วนสูง (ซม.)', bmi:'BMI',
+  procedure:'Procedure', surgery_date:'วันที่ผ่าตัด', hct:'Hct', hb:'Hb', egfr:'eGFR', cr:'Cr',
+  alb:'Alb', hba1c:'HbA1C', tq_mmhg:'TQ (mmHg)', tq_start:'TQ Start', tq_end:'TQ End',
+  tq_duration_min:'TQ Duration', extension_lag_deg:'Extension lat (°)', varus_deg:'Varus (°)',
+  valgus_deg:'Valgus (°)', surgery_start:'เวลาเริ่มผ่าตัด', surgery_end:'เวลาเสร็จผ่าตัด',
+  surgery_duration_min:'ระยะเวลาผ่าตัด', debridement_time_min:'Debridement time', suture_time_min:'Suture time',
+  pre_manual_dp:'Pre Manual DP', pre_manual_tp:'Pre Manual TP', pre_digital_dp:'Pre Digital DP', pre_digital_tp:'Pre Digital TP',
+  post_manual_dp:'Post Manual DP', post_manual_tp:'Post Manual TP', post_digital_dp:'Post Digital DP', post_digital_tp:'Post Digital TP'
+};
 
 let sb = null;
 let currentUser = null;
@@ -860,16 +872,6 @@ class FBQuery {
 }
 
 function fbError(message){return {message};}
-const firebaseAdapter = {
-  async setDoc(ref,data,opts){ return firebase.setDoc(ref,data,opts||{}); },
-  doc: (...a)=>firebase.doc(...a),
-  collection: (...a)=>firebase.collection(...a),
-  query: (...a)=>firebase.query(...a),
-  where: (...a)=>firebase.where(...a),
-  getDocs: (...a)=>firebase.getDocs(...a),
-  updateDoc: (...a)=>firebase.updateDoc(...a),
-  deleteDoc: (...a)=>firebase.deleteDoc(...a)
-};
 
 const sbAdapter = {
   from(table){
@@ -969,7 +971,6 @@ function restoreLastView(){
   try{const last=localStorage.getItem('tka_last_view');if(['list','form','detail'].includes(last)&&currentUser)showView(last)}catch(e){}
 }
 
-
 function switchAuthTab(tab){
   document.getElementById('tab-signin').classList.toggle('active', tab==='signin');
   document.getElementById('tab-signup').classList.toggle('active', tab==='signup');
@@ -979,8 +980,6 @@ function switchAuthTab(tab){
   document.getElementById('auth-msg').textContent = '';
 }
 
-
-
 function translateAuthError(msg){
   if(/invalid login credentials/i.test(msg)) return 'Username หรือรหัสผ่านไม่ถูกต้อง';
   if(/already registered/i.test(msg)) return 'อีเมลนี้ถูกใช้สมัครแล้ว';
@@ -988,22 +987,15 @@ function translateAuthError(msg){
   return msg;
 }
 
-
-
 function showAuthScreen(){
   document.getElementById('auth-screen').style.display = 'flex';
   document.getElementById('app-shell').style.display = 'none';
   currentUser = null; currentProfile = null;
 }
 
-
-
 function retryLoadProfile(){ loadProfileWithRetry(); }
 
-
-
 function applyRoleUI(){
-  // normalize กันเคส role เป็น 'Admin' / มีช่องว่างติดมา แล้วเทียบไม่ตรง
   const rawRole = currentProfile?.role || null;
   const role = rawRole ? String(rawRole).trim().toLowerCase() : null;
   document.getElementById('user-role-badge').textContent = rawRole || '?';
@@ -1015,13 +1007,8 @@ function applyRoleUI(){
   });
   document.getElementById('nav-users-btn').classList.toggle('hidden', role !== 'admin');
   document.getElementById('bn-users-btn').classList.toggle('hidden', role !== 'admin');
-  // ปุ่ม "ตั้งเป็นแอดมิน" โชว์ให้ทุกคนที่ยังไม่ใช่ admin กด (ฟังก์ชันฝั่ง DB จะเช็คเองว่ามี admin แล้วหรือยัง)
   document.getElementById('claim-admin-btn').style.display = (role !== 'admin') ? '' : 'none';
 }
-
-/* ---------------- NAV ---------------- */
-
-
 
 function renderPatientDetailGrouped(rec){
   const body = document.getElementById('detail-body');
@@ -1070,10 +1057,6 @@ function renderPatientDetailGrouped(rec){
         ['post_manual_dp','Post-op Manual DP'],['post_manual_tp','Post-op Manual TP'],
         ['post_digital_dp','Post-op Digital DP'],['post_digital_tp','Post-op Digital TP']
       ]
-    },
-    {
-      title: '7. รูปภาพ',
-      fields: []
     }
   ];
 
@@ -1086,25 +1069,20 @@ function renderPatientDetailGrouped(rec){
     return String(v);
   };
 
-  body.innerHTML = groups.map((g, i) => `
+  body.innerHTML = groups.map((g) => `
     <section class="patient-detail-group">
       <div class="patient-detail-group-title">${g.title}</div>
-      ${g.fields.length ? `<div class="patient-detail-group-body">
+      <div class="patient-detail-group-body">
         ${g.fields.map(([key,label]) => `
           <div class="patient-detail-item">
             <div class="label">${label}</div>
             <div class="value">${escapeHtml(valueFor(key))}</div>
           </div>
         `).join('')}
-      </div>` : `<div class="patient-detail-group-body" id="detail-images-group"></div>`}
+      </div>
     </section>
   `).join('');
-
-  // Reuse the existing image renderer if present.
-  if(typeof renderDetailImages === 'function') renderDetailImages(rec);
 }
-
-
 
 function showView(name){
   try{ localStorage.setItem('tka_last_view', name); }catch(e){}
@@ -1114,11 +1092,8 @@ function showView(name){
   window.scrollTo(0,0);
   if(name === 'dashboard') loadDashboard();
   if(name === 'list') loadList();
-    restoreLastView();
   if(name === 'users') loadUsers();
 }
-
-
 
 function showToast(msg, isErr){
   const t = document.getElementById('toast');
@@ -1128,15 +1103,10 @@ function showToast(msg, isErr){
   t._timer = setTimeout(() => t.classList.remove('show'), 3200);
 }
 
-/* ---------------- DASHBOARD ---------------- */
-
-
 function debouncedLoadList(){
   clearTimeout(listDebounceTimer);
   listDebounceTimer = setTimeout(loadList, 350);
 }
-
-
 
 function clearFilters(){
   document.getElementById('f-search').value = '';
@@ -1145,8 +1115,6 @@ function clearFilters(){
   document.getElementById('f-date-to').value = '';
   loadList();
 }
-
-
 
 async function loadList(){
   const tbody = document.getElementById('list-tbody');
@@ -1170,8 +1138,6 @@ async function loadList(){
   document.getElementById('list-count').textContent = `พบ ${count ?? data.length} รายการ${(count && count>300)?' (แสดง 300 รายการล่าสุด — ใช้ตัวกรองเพื่อค้นหาให้แคบลง)':''}`;
 }
 
-
-
 function procedureTag(p){
   if(p === 'TKA Rt.') return `<span class="tag tag-rt">TKA Rt.</span>`;
   if(p === 'TKA Lt.') return `<span class="tag tag-lt">TKA Lt.</span>`;
@@ -1179,20 +1145,15 @@ function procedureTag(p){
   return '—';
 }
 
-
 function formatDate(d){
   if(!d) return '—';
   const dt = new Date(d + 'T00:00:00');
   return dt.toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' });
 }
 
-
 function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-
-/* ---------------- FORM (add/edit) ---------------- */
-
 
 function updateBMIPreview(){
   const w = parseFloat(document.getElementById('rf-weight_kg').value);
@@ -1200,8 +1161,6 @@ function updateBMIPreview(){
   const el = document.getElementById('rf-bmi-preview');
   if(w>0 && h>0){ el.value = (w / Math.pow(h/100,2)).toFixed(2); } else { el.value=''; }
 }
-
-
 
 function timeDiffMinutes(start, end){
   if(!start || !end) return null;
@@ -1213,14 +1172,11 @@ function timeDiffMinutes(start, end){
   return mins;
 }
 
-
 function maskTimeInput(el){
-  // พิมพ์เลขล้วน แล้วจัดรูปแบบเป็น HH:MM (24 ชม.) ให้อัตโนมัติ ไม่ขึ้นกับ locale เครื่อง
   let digits = el.value.replace(/\D/g,'').slice(0,4);
   if(digits.length >= 3) el.value = digits.slice(0,2) + ':' + digits.slice(2);
   else el.value = digits;
 }
-
 
 function formatDuration(mins){
   if(mins === null || mins === undefined || mins === '') return '—';
@@ -1230,35 +1186,12 @@ function formatDuration(mins){
   return `${String(h).padStart(2,'0')}:${String(r).padStart(2,'0')} ชม.`;
 }
 
-
-
 function getPatientFullName(record){
   const parts = [record.name_prefix, record.first_name, record.last_name]
     .map(v => (v ?? '').toString().trim())
     .filter(Boolean);
   return parts.join(' ') || record.full_name || record.hn || '-';
 }
-
-
-
-function formatClockTime(v){
-  if(!v) return '—';
-  const s = String(v).slice(0,5);
-  return /^\d{2}:\d{2}$/.test(s) ? s : String(v);
-}
-
-
-
-function formatDetailValue(key, value){
-  if(value === null || value === undefined || value === '') return '—';
-  if(key === 'surgery_date') return formatDate(value);
-  if(key === 'tq_start' || key === 'tq_end' || key === 'surgery_start' || key === 'surgery_end') return formatClockTime(value);
-  if(key === 'tq_duration_min' || key === 'surgery_duration_min') return formatDuration(value);
-  if(key === 'extension_lag_deg' || key === 'varus_deg' || key === 'valgus_deg') return `${value} °`;
-  if(key === 'debridement_time_min' || key === 'suture_time_min') return `${value} นาที`;
-  return String(value);
-}
-
 
 function updateDurationPreview(which){
   if(which === 'tq'){
@@ -1269,8 +1202,6 @@ function updateDurationPreview(which){
     document.getElementById('rf-surgery-duration-preview').value = m===null ? '' : formatDuration(m);
   }
 }
-
-
 
 function resetForm(){
   editingId = null;
@@ -1283,8 +1214,6 @@ function resetForm(){
   document.getElementById('new-image-grid').innerHTML = '';
   document.getElementById('existing-image-grid').innerHTML = '';
 }
-
-
 
 function renderExistingImages(images){
   const grid = document.getElementById('existing-image-grid');
@@ -1303,17 +1232,11 @@ function renderExistingImages(images){
   images.forEach(img => loadSignedThumbnail(img.file_path));
 }
 
-
-
 function getPublicOrSignedUrlPlaceholder(){
   return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="150" height="110"><rect width="100%" height="100%" fill="%23EFF3F2"/></svg>');
 }
 
-
-
 function cssEscape(s){ return String(s).replace(/["\\]/g,'\\$&'); }
-
-
 
 function handleFileSelect(e){
   const files = Array.from(e.target.files || []);
@@ -1324,8 +1247,6 @@ function handleFileSelect(e){
   e.target.value = '';
   renderNewImages();
 }
-
-
 
 function renderNewImages(){
   const grid = document.getElementById('new-image-grid');
@@ -1343,15 +1264,18 @@ function renderNewImages(){
   `).join('');
 }
 
-
 function removePendingImage(idx){ pendingNewImages.splice(idx,1); renderNewImages(); }
-
-
 
 function closeLightbox(){ document.getElementById('lightbox').style.display = 'none'; }
 
-
-
+async function openLightboxByPath(path){
+  const lb = document.getElementById('lightbox');
+  const img = document.getElementById('lightbox-img');
+  lb.style.display = 'flex';
+  img.src = getPublicOrSignedUrlPlaceholder();
+  const { data } = await sb.storage.from('tka-images').createSignedUrl(path, 3600);
+  if(data) img.src = data.signedUrl;
+}
 
 async function exportCSV(){
   showToast('กำลังเตรียมไฟล์ CSV…');
@@ -1377,15 +1301,11 @@ async function exportCSV(){
   showToast(`Export สำเร็จ (${full.length} รายการ)`);
 }
 
-
 function csvEscape(v){
   if(v === null || v === undefined) return '';
   const s = String(v);
   return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
 }
-
-/* ---------------- USERS (admin) ---------------- */
-
 
 async function handleSignIn(e){
  e.preventDefault(); const errEl=document.getElementById('auth-error'); errEl.textContent='';
@@ -1416,16 +1336,6 @@ async function handleSignUp(e){
 }
 
 async function handleSignOut(){await sb.auth.signOut();showAuthScreen();}
-
-async function changeUsername(){
- const current=(currentProfile?.username||'').trim(),u=prompt('ตั้ง Username ใหม่ (ภาษาอังกฤษเท่านั้น)',current); if(u===null)return;
- const n=u.trim();if(!/^[A-Za-z][A-Za-z0-9._-]{2,31}$/.test(n)){showToast('Username ต้องเป็นภาษาอังกฤษเท่านั้น และยาว 3–32 ตัวอักษร',true);return;}
- const {data:exists}=await sb.rpc('username_exists',{p_username:n});if(exists){showToast('Username นี้ถูกใช้แล้ว',true);return;}
- await sb.from('login_lookup').delete().eq('id',current.toLowerCase());
- await sb.from('login_lookup').insert({id:n.toLowerCase(),username:n,username_lower:n.toLowerCase(),email:currentUser.email,uid:currentUser.id,created_at:new Date().toISOString()});
- await sb.from('profiles').update({username:n}).eq('id',currentUser.id);
- currentProfile.username=n;showToast('เปลี่ยน Username แล้ว');applyRoleUI();
-}
 
 async function handleAuthed(user){
  currentUser={id:user.uid||user.id,email:user.email,user_metadata:{username:''},user};
@@ -1474,11 +1384,17 @@ async function saveRecord(e){
  e.preventDefault();const btn=document.getElementById('rf-save-btn');btn.disabled=true;btn.textContent='กำลังบันทึก…';
  try{
   const payload={};FORM_FIELDS.forEach(f=>{const el=document.getElementById('rf-'+f);if(el)payload[f]=el.value===''?null:el.value});if(!payload.hn)throw new Error('กรุณากรอก HN');payload.full_name=getPatientFullName(payload);
+  if(payload.weight_kg && payload.height_cm){
+    payload.bmi = (parseFloat(payload.weight_kg) / Math.pow(parseFloat(payload.height_cm)/100, 2)).toFixed(2);
+  }
+  if(payload.tq_start && payload.tq_end){ payload.tq_duration_min = timeDiffMinutes(payload.tq_start, payload.tq_end); }
+  if(payload.surgery_start && payload.surgery_end){ payload.surgery_duration_min = timeDiffMinutes(payload.surgery_start, payload.surgery_end); }
+
   let recordId=editingId;
   if(editingId){payload.updated_by=currentUser.id;const {error}=await sb.from('records').update(payload).eq('id',editingId);if(error)throw error}
   else{payload.created_by=currentUser.id;const {data,error}=await sb.from('records').insert(payload).select('id').single();if(error)throw error;recordId=data.id}
   for(const item of pendingNewImages){
-   const ext=(item.file.name.split('.').pop()||'jpg').toLowerCase(),path='drive:'+crypto.randomUUID();
+   const path='drive:'+crypto.randomUUID();
    const up=await sb.storage.from('tka-images').upload(path,item.file);if(up.error)throw up.error;
    const driveId=up.data.path.replace(/^drive:/,'');
    const {error}=await sb.from('record_images').insert({record_id:recordId,file_path:'drive:'+driveId,image_type:item.type,description:item.description||null,uploaded_by:currentUser.id,drive_file_id:driveId,created_at:new Date().toISOString()});if(error)throw error;
@@ -1512,9 +1428,25 @@ async function loadUsers(){
 
 async function updateUserRole(userId,role){const {error}=await sb.from('profiles').update({role}).eq('id',userId);if(error){showToast('เปลี่ยนสิทธิ์ไม่สำเร็จ: '+error.message,true);return}showToast('เปลี่ยนสิทธิ์แล้ว');if(userId===currentUser.id){currentProfile.role=role;applyRoleUI()}}
 
-async function syncPostToGoogle(payload){
- const res=await fetch(GOOGLE_DRIVE_BACKUP_URL+'?key='+encodeURIComponent(GOOGLE_DRIVE_BACKUP_SECRET),{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
- if(!res.ok)throw new Error('Google Apps Script HTTP '+res.status);return res;
+async function syncAllToGoogleSheets(){
+  const btn = document.getElementById('sync-google-btn');
+  btn.disabled = true; btn.textContent = '⏳ กำลังสำรองข้อมูล…';
+  try {
+    const { data: records, error } = await sb.from('records').select('*');
+    if(error) throw error;
+    const resp = await fetch(GOOGLE_DRIVE_BACKUP_URL + '?key=' + encodeURIComponent(GOOGLE_DRIVE_BACKUP_SECRET), {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ kind: 'sheets_backup', records: records || [] })
+    });
+    const res = await resp.json();
+    if(res.ok) showToast(`สำรองข้อมูลเรียบร้อย (${records.length} เคส)`);
+    else throw new Error(res.error || 'สำรองข้อมูลไม่สำเร็จ');
+  } catch(e) {
+    showToast('การสำรองข้อมูลล้มเหลว: ' + e.message, true);
+  } finally {
+    btn.disabled = false; btn.textContent = '☁ สำรองไป Google Sheets';
+  }
 }
 
 async function claimAdmin(){
@@ -1528,39 +1460,17 @@ async function claimAdmin(){
 
 async function deleteExistingImage(imageId,filePath){
  if(!confirm('ลบรูปนี้ใช่หรือไม่?'))return;
- const {data:imageBefore}=await sb.from('record_images').select('*').eq('id',imageId).maybeSingle();
- const {error}=await sb.from('record_images').delete().eq('id',imageId);if(error){showToast('ลบรูปไม่สำเร็จ: '+error.message,true);return}
- if(imageBefore)syncPostToGoogle({kind:'image_delete',record:{id:imageBefore.id}}).catch(()=>{});
- document.querySelector(`[data-image-id="${imageId}"]`)?.remove();showToast('ลบรูปแล้ว');
-}
-
-async function openLightboxByPath(path){
- const {data,error}=await sb.storage.from('tka-images').createSignedUrl(path,3600);
- if(error){showToast('เปิดรูปไม่สำเร็จ: '+error.message,true);return}
- document.getElementById('lightbox-img').src=data.signedUrl;document.getElementById('lightbox').style.display='flex';
-}
-
-async function syncAllToGoogleSheets(){
- if(!currentUser){showToast('กรุณา Login ก่อน',true);return} if(currentProfile?.role!=='admin'){showToast('เฉพาะ Admin เท่านั้น',true);return}
- if(!confirm('สำรองข้อมูลที่มีอยู่ทั้งหมดไป Google Sheets ตอนนี้ใช่หรือไม่?'))return;
- const btn=document.getElementById('sync-google-btn');if(btn){btn.disabled=true;btn.textContent='☁ กำลังสำรอง…'}
  try{
-  let total=0;for(const table of ['records','profiles','record_images']){const {data,error}=await sb.from(table).select('*').limit(10000);if(error)throw new Error(table+': '+error.message);for(const row of data||[]){await syncPostToGoogle({type:'INSERT',table,schema:'firebase',record:row,old_record:null});total++}}
-  showToast(`สำรองข้อมูลแล้ว ${total} รายการ`);
- }catch(e){showToast('สำรองไม่สำเร็จ: '+e.message,true)}finally{if(btn){btn.disabled=false;btn.textContent='☁ สำรองไป Google Sheets'}}
+  const {error}=await sb.from('record_images').delete().eq('id',imageId);
+  if(error) throw error;
+  showToast('ลบรูปภาพแล้ว');
+  const card = document.querySelector(`.image-card[data-image-id="${imageId}"]`);
+  if(card) card.remove();
+  if(editingId) openForm(editingId);
+ }catch(e){
+  showToast('ลบรูปไม่สำเร็จ: ' + e.message, true);
+ }
 }
-
 </script>
 </body>
 </html>
-
-<script>
-document.addEventListener('visibilitychange', () => {
-  if(!document.hidden){
-    try{
-      const last = localStorage.getItem('tka_last_view');
-      if(last && ['list','form','detail'].includes(last) && currentUser) showView(last);
-    }catch(e){}
-  }
-});
-</script>
