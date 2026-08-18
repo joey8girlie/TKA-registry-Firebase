@@ -1183,7 +1183,9 @@ function formatDuration(mins){
   const m = Math.round(Number(mins));
   if(isNaN(m) || m < 0) return '—';
   const h = Math.floor(m/60), r = m%60;
-  return `${String(h).padStart(2,'0')}:${String(r).padStart(2,'0')} ชม.`;
+  if(h === 0) return `${r} นาที`;
+  if(r === 0) return `${h} ชม.`;
+  return `${h} ชม. ${r} นาที`;
 }
 
 function getPatientFullName(record){
@@ -1328,7 +1330,10 @@ async function handleSignUp(e){
  if(error){err.textContent=translateAuthError(error.message||'สมัครสมาชิกไม่สำเร็จ');btn.disabled=false;btn.textContent='สมัครสมาชิก';return false;}
  if(data?.user){
    const now=new Date().toISOString();
-   await sb.from('profiles').insert({id:data.user.uid||data.user.id,email,username,full_name,role:'admin',created_at:now});
+   const {data:existing}=await sb.from('profiles').select('*');
+   const hasAdmin=(existing||[]).some(p=>String(p.role||'').toLowerCase()==='admin');
+   const role=hasAdmin?'viewer':'admin'; // คนแรกในระบบเท่านั้นที่ได้ admin อัตโนมัติ คนถัดไปเป็น viewer รอแอดมินปรับสิทธิ์
+   await sb.from('profiles').insert({id:data.user.uid||data.user.id,email,username,full_name,role,created_at:now});
    await sb.from('login_lookup').insert({id:username.toLowerCase(),username,username_lower:username.toLowerCase(),email,uid:data.user.uid||data.user.id,created_at:now});
  }
  msg.textContent='สมัครสมาชิกสำเร็จ — สามารถเข้าสู่ระบบด้วย Username ได้';
@@ -1414,6 +1419,8 @@ async function viewDetail(id){
 
 async function deleteRecord(id){
  if(!confirm('ยืนยันการลบข้อมูลผู้ป่วยรายนี้? การลบไม่สามารถย้อนกลับได้'))return;
+ const {data:images}=await sb.from('record_images').select('*').eq('record_id',id);
+ for(const img of (images||[])){ await sb.from('record_images').delete().eq('id',img.id); }
  const {error}=await sb.from('records').delete().eq('id',id);if(error){showToast('ลบไม่สำเร็จ: '+error.message,true);return}
  showToast('ลบข้อมูลแล้ว');showView('list');
 }
