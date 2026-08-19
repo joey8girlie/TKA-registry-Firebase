@@ -323,12 +323,7 @@ tbody tr:last-child td{border-bottom:none;}
 }
 #print-footer{display:none}
 
-@media print{
-  #app-shell > .topbar, #config-warning, main > .view > .page-head .btn, .no-print, #bottom-nav{display:none !important;}
-  main{max-width:100%; padding:0;}
-  body{background:#fff;}
-  .card{box-shadow:none; border:none;}
-}
+
 
 /* ---------- role status banners ---------- */
 #role-loading-banner, #role-error-banner{
@@ -415,17 +410,6 @@ tbody tr:last-child td{border-bottom:none;}
   tbody#list-tbody .row-actions{justify-content:flex-end; padding-top:8px; border-top:1px solid var(--line-soft); margin-top:2px;}
 }
 
-.detail-section{margin:0 0 18px;padding:0 0 14px;border-bottom:1px solid var(--line,#e5e7eb)}
-.detail-section:last-child{border-bottom:0;margin-bottom:0}
-.detail-section h3{margin:0 0 10px;font-size:15px;font-weight:700}
-.detail-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.detail-item{padding:9px 11px;background:var(--surface-2,#f7f7f8);border-radius:8px}
-.detail-label{font-size:11px;color:var(--ink-faint,#6b7280);margin-bottom:3px}
-.detail-value{font-size:14px;font-weight:600;word-break:break-word}
-@media(max-width:800px){.detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:520px){.detail-grid{grid-template-columns:1fr}}
-
-
 /* Patient detail grouped layout */
 .patient-detail-group{margin:0 0 16px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;background:#fff}
 .patient-detail-group-title{padding:9px 12px;background:#f5f7fa;font-weight:700;font-size:14px;border-bottom:1px solid #e5e7eb}
@@ -440,37 +424,7 @@ tbody tr:last-child td{border-bottom:none;}
 }
 
 
-/* ===== A4 one-page patient report ===== */
-@media print{
-  @page{size:A4 portrait;margin:10mm}
-  body{background:#fff!important}
-  body *{visibility:hidden!important}
-  #print-report,#print-report *{visibility:visible!important}
-  #print-report{
-    display:block!important;
-    position:absolute!important;
-    left:0!important;top:0!important;
-    width:190mm!important;
-    min-height:277mm!important;
-    background:#fff!important;
-    color:#111!important;
-    font-family:Arial,"Noto Sans Thai",sans-serif!important;
-    font-size:9.5pt!important;
-    line-height:1.25!important;
-  }
-  #print-report .report-header{border-bottom:1.5px solid #111;padding-bottom:4mm;margin-bottom:3mm}
-  #print-report h1{font-size:16pt!important;margin:0 0 1mm!important}
-  #print-report h2{font-size:11pt!important;margin:2.5mm 0 1.5mm!important;border-bottom:1px solid #bbb;padding-bottom:1mm}
-  #print-report .meta{display:grid;grid-template-columns:repeat(4,1fr);gap:2mm;margin-bottom:2mm}
-  #print-report .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5mm 4mm}
-  #print-report .cell{display:flex;gap:2mm}
-  #print-report .label{font-weight:700;min-width:32mm}
-  #print-report .value{word-break:break-word}
-  #print-report table{width:100%;border-collapse:collapse;font-size:8.5pt}
-  #print-report th,#print-report td{border:1px solid #aaa;padding:1.2mm;vertical-align:top}
-  #print-report .footer{margin-top:4mm;font-size:8pt;color:#444}
-}
-#print-report{display:none}
+
 
 .admin-account-row{display:grid;grid-template-columns:1.1fr 1.6fr .8fr auto;gap:8px;align-items:center;padding:10px;border-bottom:1px solid #e5e7eb}
 .admin-account-actions{display:flex;gap:6px;flex-wrap:wrap}
@@ -502,7 +456,7 @@ tbody tr:last-child td{border-bottom:none;}
  .pr-footer{text-align:right;font-size:5.8pt;color:#737b7d;border-top:.25mm solid #ccd4d5;padding-top:1mm}
 }
 </style>
-<style>.pr-img-missing{display:flex;align-items:center;justify-content:center;font-size:6pt;color:#888}</style>
+
 </head>
 <body>
 
