@@ -419,9 +419,6 @@ tbody tr:last-child td{border-bottom:none;}
 .patient-detail-item .value{font-size:13px;font-weight:600;word-break:break-word}
 .detail-images-inside-group{grid-column:1/-1;width:100%}
 .detail-images-inside-group .gallery{width:100%}
-.detail-images-title{font-weight:700;font-size:13px;color:var(--primary);margin-bottom:8px}
-.detail-images-inside-group{padding:2px 0}
-
 
 @media(max-width:800px){.patient-detail-group-body{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.patient-detail-group-body{grid-template-columns:1fr}}
@@ -754,7 +751,11 @@ tbody tr:last-child td{border-bottom:none;}
         </div>
       </div>
       <div class="card card-pad" id="detail-body"></div>
-      <div id="print-footer">TKA Registry — Patient Report</div>
+      <div class="card card-pad" id="detail-gallery-card" style="margin-top:16px;">
+        <h3 style="margin-top:0; font-size:15px;">รูปภาพ</h3>
+        <div class="gallery" id="detail-gallery"></div>
+        <div id="print-footer">TKA Registry — Patient Report</div>
+      </div>
     </section>
 
     <!-- ===== USERS (admin) ===== -->
@@ -1143,10 +1144,7 @@ function renderPatientDetailGrouped(rec){
             <div class="label">${label}</div>
             <div class="value">${escapeHtml(valueFor(key))}</div>
           </div>
-        `).join('') : `<div id="detail-images-group" class="detail-images-inside-group">
-          <div class="detail-images-title">รูปภาพ</div>
-          <div class="gallery" id="detail-gallery"></div>
-        </div>`}
+        `).join('') : `<div id="detail-images-group" class="detail-images-inside-group"></div>`}
       </div>
     </section>
   `).join('');
