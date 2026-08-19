@@ -417,6 +417,9 @@ tbody tr:last-child td{border-bottom:none;}
 .patient-detail-item{padding:8px 10px;border:1px solid #eef0f3;border-radius:7px;background:#fafbfc}
 .patient-detail-item .label{font-size:11px;color:#6b7280;margin-bottom:2px}
 .patient-detail-item .value{font-size:13px;font-weight:600;word-break:break-word}
+.detail-images-inside-group{grid-column:1/-1;width:100%}
+.detail-images-inside-group .gallery{width:100%}
+
 @media(max-width:800px){.patient-detail-group-body{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.patient-detail-group-body{grid-template-columns:1fr}}
 @media print{
@@ -1135,14 +1138,14 @@ function renderPatientDetailGrouped(rec){
   body.innerHTML = groups.map((g, i) => `
     <section class="patient-detail-group">
       <div class="patient-detail-group-title">${g.title}</div>
-      ${g.fields.length ? `<div class="patient-detail-group-body">
-        ${g.fields.map(([key,label]) => `
+      <div class="patient-detail-group-body">
+        ${g.fields.length ? g.fields.map(([key,label]) => `
           <div class="patient-detail-item">
             <div class="label">${label}</div>
             <div class="value">${escapeHtml(valueFor(key))}</div>
           </div>
-        `).join('')}
-      </div>` : `<div class="patient-detail-group-body" id="detail-images-group"></div>`}
+        `).join('') : `<div id="detail-images-group" class="detail-images-inside-group"></div>`}
+      </div>
     </section>
   `).join('');
 
@@ -1999,7 +2002,7 @@ function printPatientReport(record){
         <div class="pr-head-right"><div><b>HN:</b> ${esc(r.hn)}</div><div><b>วันที่ผ่าตัด:</b> ${esc(date(r.surgery_date))}</div></div>
       </div>
       ${groupHtml}
-      <section class="pr-group pr-images"><div class="pr-group-title">7. รูปภาพ</div><div id="pr-image-grid"></div></section>
+      <section class="pr-group pr-images"><div class="pr-group-title">8. รูปภาพ</div><div id="pr-image-grid"></div></section>
       <div class="pr-footer">พิมพ์เมื่อ ${esc(new Date().toLocaleString('th-TH'))}</div>
     </div>`;
 
