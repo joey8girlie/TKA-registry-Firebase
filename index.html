@@ -319,9 +319,7 @@ tbody tr:last-child td{border-bottom:none;}
   #detail-gallery > div{break-inside:avoid;text-align:center}
   #detail-gallery img{width:100% !important;height:25mm !important;object-fit:cover !important;border-radius:1mm !important}
   #detail-gallery .gcap{font-size:6.5pt !important;color:#555 !important;margin-top:.5mm !important}
-  #print-footer{display:block !important;margin-top:2.5mm !important;padding-top:1.5mm;border-top:.25mm solid #bbb;font-size:6.5pt;color:#666;text-align:right}
 }
-#print-footer{display:none}
 
 @media print{
   #app-shell > .topbar, #config-warning, main > .view > .page-head .btn, .no-print, #bottom-nav{display:none !important;}
@@ -505,6 +503,14 @@ tbody tr:last-child td{border-bottom:none;}
   #print-report table{width:100%;border-collapse:collapse;font-size:8.5pt}
   #print-report th,#print-report td{border:1px solid #BE8A34;padding:1.2mm;vertical-align:top}
   #print-report th{background:#F3E6C8}
+  #print-report .p-photos{border-color:#0F4C4A}
+  #print-report .photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2mm;background:#fff;padding:2.5mm}
+  #print-report .photo-loading{grid-column:1/-1;padding:4mm;text-align:center;color:#8A9793;font-size:8.5pt}
+  #print-report .photo-cell{border:1px solid #DEE6E3;border-radius:1.5mm;overflow:hidden;break-inside:avoid;background:#fafcfb}
+  #print-report .photo-cell img{display:block;width:100%;height:28mm;object-fit:cover}
+  #print-report .photo-cell .pcap{font-size:7pt;color:#54655F;padding:1mm 1.5mm;text-align:center}
+  #print-report .photo-fail{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:28mm}
+  #print-report .photo-fail .pfail{font-size:7pt;color:#AC4038}
   #print-report .footer{
     margin-top:4mm;font-size:8pt;color:#8A9793;
     border-top:1px solid #DEE6E3;padding-top:2mm;
@@ -555,10 +561,9 @@ tbody tr:last-child td{border-bottom:none;}
       <button class="btn btn-primary" type="submit" id="su-btn">สมัครสมาชิก</button>
     </form>
     <p style="font-size:11.5px; color:var(--ink-soft); margin-top:14px; line-height:1.5;">
-      Username ใช้สำหรับเข้าสู่ระบบ ส่วน Email จะถูกผูกไว้กับบัญชีเพื่อยืนยันตัวตนและกู้คืนบัญชี<br>
-      บัญชีที่สมัครใหม่จะเริ่มต้นด้วยสิทธิ์ <b>Viewer</b> (ดูอย่างเดียว) — ให้ผู้ดูแลระบบ (Admin)
-      ปรับสิทธิ์ให้ในเมนู "ผู้ใช้งาน" หลังจากนั้น
-    </p>
+  <span style="display: block; text-align: center; margin-bottom: 4px;">Develop By Udomsak Thoukaew - OR SMH</span>
+  บัญชีที่สมัครใหม่จะเริ่มต้นด้วยสิทธิ์ <b>Viewer</b> (ดูอย่างเดียว) — ให้ผู้ดูแลระบบ (Admin) ปรับสิทธิ์ให้ในเมนู "ผู้ใช้งาน" หลังจากนั้น
+</p>
   </div>
 </div>
 
@@ -571,7 +576,7 @@ tbody tr:last-child td{border-bottom:none;}
           <path d="M6.5 3.2c1.5 0 2.7 1.2 2.7 2.7 0 .4-.1.8-.2 1.1l6.4 6.4c.3-.1.7-.2 1.1-.2 1.5 0 2.7 1.2 2.7 2.7s-1.2 2.7-2.7 2.7c-1.5 0-2.7-1.2-2.7-2.7 0-.4.1-.8.2-1.1L7.6 8.4c-.3.1-.7.2-1.1.2-1.5 0-2.7-1.2-2.7-2.7s1.2-2.7 2.7-2.7z" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
         </svg>
       </div>
-      <div class="titles"><b>TKA Registry</b><span>v2 · Firebase + Drive</span></div>
+      <div class="titles"><b>TKA Registry</b><span>Total Knee Arthroplasty · Firebase + Drive</span></div>
     </div>
     <div class="nav-tabs">
       <button data-view="dashboard" class="active" onclick="showView('dashboard')">แดชบอร์ด</button>
@@ -790,7 +795,7 @@ tbody tr:last-child td{border-bottom:none;}
       <div class="page-head">
         <div><h1 id="detail-title">รายละเอียดผู้ป่วย</h1><p id="detail-sub"></p></div>
         <div style="display:flex; gap:8px;">
-          <button class="btn" onclick="printPatientReport(window.currentPatientRecord||window.currentRecord||{});">🖨 พิมพ์</button>
+          <button class="btn" id="detail-print-btn" onclick="printPatientReport(window.currentPatientRecord||window.currentRecord||{},window.currentPatientRecordImages||[]);">🖨 พิมพ์</button>
           <button class="btn btn-accent role-gate gate-hidden" id="detail-edit-btn">✎ แก้ไข</button>
           <button class="btn btn-danger admin-gate gate-hidden" id="detail-delete-btn">🗑 ลบ</button>
         </div>
@@ -799,7 +804,6 @@ tbody tr:last-child td{border-bottom:none;}
       <div class="card card-pad" id="detail-gallery-card" style="margin-top:16px;">
         <h3 style="margin-top:0; font-size:15px;">รูปภาพ</h3>
         <div class="gallery" id="detail-gallery"></div>
-        <div id="print-footer">TKA Registry — Patient Report</div>
       </div>
     </section>
 
@@ -1613,9 +1617,10 @@ async function saveRecord(e){
 async function viewDetail(id){
  showView('detail');document.getElementById('detail-body').innerHTML='<div class="loading"><span class="spinner"></span> กำลังโหลดข้อมูล…</div>';document.getElementById('detail-gallery').innerHTML='';
  const {data:rec,error}=await sb.from('records').select('*').eq('id',id).single();if(error){document.getElementById('detail-body').innerHTML='<div class="empty-note">'+escapeHtml(error.message)+'</div>';return}
+ window.currentPatientRecord=rec;window.currentRecord=rec;window.currentPatientRecordImages=[];
  document.getElementById('detail-title').textContent=getPatientFullName(rec);document.getElementById('detail-sub').textContent=`HN ${rec.hn} · ${rec.procedure||'-'} · ${formatDate(rec.surgery_date)}`;
  renderPatientDetailGrouped(rec);document.getElementById('detail-edit-btn').onclick=()=>openForm(id);document.getElementById('detail-delete-btn').onclick=()=>deleteRecord(id);applyRoleUI();
- const {data:images}=await sb.from('record_images').select('*').eq('record_id',id).order('created_at');const gallery=document.getElementById('detail-gallery');if(!images?.length){gallery.innerHTML='<div class="empty-note">ยังไม่มีรูปภาพ</div>';return}
+ const {data:images}=await sb.from('record_images').select('*').eq('record_id',id).order('created_at');window.currentPatientRecordImages=images||[];const gallery=document.getElementById('detail-gallery');if(!images?.length){gallery.innerHTML='<div class="empty-note">ยังไม่มีรูปภาพ</div>';return}
  gallery.innerHTML=images.map(img=>`<div><img data-path="${escapeHtml(img.file_path)}" src="${getPublicOrSignedUrlPlaceholder()}" onclick="openLightboxByPath('${String(img.file_path).replace(/'/g,"\\'")}')" alt=""><div class="gcap">${escapeHtml(img.image_type||'')}</div></div>`).join('');images.forEach(img=>loadSignedThumbnail(img.file_path));
 }
 
@@ -1840,43 +1845,87 @@ document.addEventListener('visibilitychange', () => {
 function escPrint(v){
   return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-function printPatientReport(record){
+async function printPatientReport(record,images){
   const r=record||{};
-  const duration=v=>v==null||v===''?'-':formatDuration(Number(v));
-  const full=r.full_name || [r.name_prefix,r.first_name,r.last_name].filter(Boolean).join(' ') || '-';
-  const sections=[
-    {title:'ข้อมูลผู้ป่วย',cells:[
-      ['HN',r.hn],['ชื่อ-สกุล',full],['อายุ',r.age?`${r.age} ปี`:'-'],['เพศ',r.gender||'-'],
-      ['BMI',r.bmi==null||r.bmi===''?'-':Number(r.bmi).toFixed(1)],
-      ['Diagnosis',r.diagnosis||'-'],['Side',r.side||'-'],['Surgeon',r.surgeon||'-']
-    ]},
-    {title:'ระยะเวลาห้ามเลือด / ผ่าตัด',cells:[
-      ['TQ Start',r.tq_start||'-'],['TQ End',r.tq_end||'-'],['TQ Duration',duration(r.tq_duration_min)],
-      ['Surgery Start',r.surgery_start||'-'],['Surgery End',r.surgery_end||'-'],['Surgery Duration',duration(r.surgery_duration_min)]
-    ]},
-    {title:'ข้อมูลเพิ่มเติม',cells:[
-      ['Implant',r.implant||'-'],['Anesthesia',r.anesthesia||'-'],['Notes',r.notes||'-']
-    ]}
-  ];
-  const sectionsHtml=sections.map(sec=>`
-    <div class="p-section">
-      <div class="p-section-title">${escPrint(sec.title)}</div>
-      <div class="grid">${sec.cells.map(x=>`<div class="cell"><span class="label">${escPrint(x[0])}</span><span class="value">${escPrint(x[1])}</span></div>`).join('')}</div>
-    </div>`).join('');
-  const now=new Date().toLocaleString('th-TH');
-  document.getElementById('print-report').innerHTML = `
-    <div class="report-header">
-      <h1>TKA Registry — Patient Report</h1>
-      <div>รายงานข้อมูลผู้ป่วยสำหรับการบันทึก/พิมพ์</div>
-    </div>
-    <div class="meta">
-      <div><b>HN:</b> ${escPrint(r.hn)}</div>
-      <div><b>ชื่อ-สกุล:</b> ${escPrint(full)}</div>
-    </div>
-    ${sectionsHtml}
-    <div class="footer">พิมพ์เมื่อ: ${now}</div>
-  `;
-  window.print();
+  const imgs=Array.isArray(images)?images:[];
+  const btn=document.getElementById('detail-print-btn');
+  if(btn){btn.disabled=true;btn.dataset.origText=btn.textContent;btn.textContent='🖨 กำลังเตรียมรายงาน…';}
+  try{
+    const duration=v=>v==null||v===''?'-':formatDuration(Number(v));
+    const full=r.full_name || [r.name_prefix,r.first_name,r.last_name].filter(Boolean).join(' ') || '-';
+    const sections=[
+      {title:'ข้อมูลผู้ป่วย',cells:[
+        ['HN',r.hn],['ชื่อ-สกุล',full],['อายุ',r.age?`${r.age} ปี`:'-'],['เพศ',r.gender||'-'],
+        ['BMI',r.bmi==null||r.bmi===''?'-':Number(r.bmi).toFixed(1)],
+        ['Diagnosis',r.diagnosis||'-'],['Side',r.side||'-'],['Surgeon',r.surgeon||'-']
+      ]},
+      {title:'ระยะเวลาห้ามเลือด / ผ่าตัด',cells:[
+        ['TQ Start',r.tq_start||'-'],['TQ End',r.tq_end||'-'],['TQ Duration',duration(r.tq_duration_min)],
+        ['Surgery Start',r.surgery_start||'-'],['Surgery End',r.surgery_end||'-'],['Surgery Duration',duration(r.surgery_duration_min)]
+      ]},
+      {title:'ข้อมูลเพิ่มเติม',cells:[
+        ['Implant',r.implant||'-'],['Anesthesia',r.anesthesia||'-'],['Notes',r.notes||'-']
+      ]}
+    ];
+    const sectionsHtml=sections.map(sec=>`
+      <div class="p-section">
+        <div class="p-section-title">${escPrint(sec.title)}</div>
+        <div class="grid">${sec.cells.map(x=>`<div class="cell"><span class="label">${escPrint(x[0])}</span><span class="value">${escPrint(x[1])}</span></div>`).join('')}</div>
+      </div>`).join('');
+    const photosHtml = imgs.length ? `
+      <div class="p-section p-photos">
+        <div class="p-section-title">รูปภาพประกอบ (${imgs.length})</div>
+        <div class="photo-grid" id="print-photo-grid">
+          <div class="photo-loading">กำลังโหลดรูปภาพ…</div>
+        </div>
+      </div>` : '';
+    const now=new Date().toLocaleString('th-TH');
+    document.getElementById('print-report').innerHTML = `
+      <div class="report-header">
+        <h1>TKA Registry — Patient Report</h1>
+        <div>รายงานข้อมูลผู้ป่วยสำหรับการบันทึก/พิมพ์</div>
+      </div>
+      <div class="meta">
+        <div><b>HN:</b> ${escPrint(r.hn)}</div>
+        <div><b>ชื่อ-สกุล:</b> ${escPrint(full)}</div>
+      </div>
+      ${sectionsHtml}
+      ${photosHtml}
+      <div class="footer">พิมพ์เมื่อ: ${now}</div>
+    `;
+    if(imgs.length) await loadPrintPhotos(imgs);
+    window.print();
+  }catch(e){
+    showToast('เตรียมรายงานไม่สำเร็จ: '+(e.message||e),true);
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent=btn.dataset.origText||'🖨 พิมพ์';}
+  }
+}
+
+async function loadPrintPhotos(imgs){
+  const grid=document.getElementById('print-photo-grid');
+  if(!grid)return;
+  const results=await Promise.all(imgs.map(async img=>{
+    const label=img.image_type||img.description||'';
+    try{
+      const id=String(img.file_path||'').replace(/^drive:/,'');
+      if(!id) throw new Error('no file');
+      const url=GOOGLE_DRIVE_BACKUP_URL+'?key='+encodeURIComponent(GOOGLE_DRIVE_BACKUP_SECRET)+'&kind=image&file_id='+encodeURIComponent(id)+'&thumb=1';
+      const resp=await fetch(url);
+      if(!resp.ok) throw new Error('HTTP '+resp.status);
+      const j=await resp.json();
+      if(!j.ok || !j.base64) throw new Error(j.error||'ไม่พบข้อมูลรูป');
+      return {ok:true,label,src:'data:'+(j.mime_type||'image/jpeg')+';base64,'+j.base64};
+    }catch(e){
+      return {ok:false,label};
+    }
+  }));
+  grid.innerHTML = results.map(x=> x.ok
+    ? `<div class="photo-cell"><img src="${x.src}" alt=""><div class="pcap">${escPrint(x.label)}</div></div>`
+    : `<div class="photo-cell photo-fail"><div class="pfail">โหลดรูปไม่สำเร็จ</div><div class="pcap">${escPrint(x.label)}</div></div>`
+  ).join('');
+  const imgEls=[...grid.querySelectorAll('img')];
+  await Promise.all(imgEls.map(im => im.decode ? im.decode().catch(()=>{}) : new Promise(res=>{ im.onload=im.onerror=res; })));
 }
 </script>
 <div id="print-report" aria-hidden="true"></div>
