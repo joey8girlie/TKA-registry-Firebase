@@ -502,6 +502,7 @@ tbody tr:last-child td{border-bottom:none;}
  .pr-footer{text-align:right;font-size:5.8pt;color:#737b7d;border-top:.25mm solid #ccd4d5;padding-top:1mm}
 }
 </style>
+<style>.pr-img-missing{display:flex;align-items:center;justify-content:center;font-size:6pt;color:#888}</style>
 </head>
 <body>
 
@@ -1598,7 +1599,7 @@ async function saveRecord(e){
 async function viewDetail(id){
  showView('detail');document.getElementById('detail-body').innerHTML='<div class="loading"><span class="spinner"></span> กำลังโหลดข้อมูล…</div>';document.getElementById('detail-gallery').innerHTML='';
  const {data:rec,error}=await sb.from('records').select('*').eq('id',id).single();if(error){document.getElementById('detail-body').innerHTML='<div class="empty-note">'+escapeHtml(error.message)+'</div>';return}
- document.getElementById('detail-title').textContent=getPatientFullName(rec);document.getElementById('detail-sub').textContent=`HN ${rec.hn} · ${rec.procedure||'-'} · ${formatDate(rec.surgery_date)}`;
+ window.currentPatientRecord=rec;window.currentRecord=rec;document.getElementById('detail-title').textContent=getPatientFullName(rec);document.getElementById('detail-sub').textContent=`HN ${rec.hn} · ${rec.procedure||'-'} · ${formatDate(rec.surgery_date)}`;
  renderPatientDetailGrouped(rec);document.getElementById('detail-edit-btn').onclick=()=>openForm(id);document.getElementById('detail-delete-btn').onclick=()=>deleteRecord(id);applyRoleUI();
  const {data:images}=await sb.from('record_images').select('*').eq('record_id',id).order('created_at');const gallery=document.getElementById('detail-gallery');if(!images?.length){gallery.innerHTML='<div class="empty-note">ยังไม่มีรูปภาพ</div>';return}
  gallery.innerHTML=images.map(img=>`<div><img data-path="${escapeHtml(img.file_path)}" src="${getPublicOrSignedUrlPlaceholder()}" onclick="openLightboxByPath('${String(img.file_path).replace(/'/g,"\\'")}')" alt=""><div class="gcap">${escapeHtml(img.image_type||'')}</div></div>`).join('');images.forEach(img=>loadSignedThumbnail(img.file_path));
@@ -1610,20 +1611,51 @@ async function deleteRecord(id){
  showToast('ลบข้อมูลแล้ว');showView('list');
 }
 
+const imageUrlCache=new Map();
+const imagePromiseCache=new Map();
+
 async function loadSignedThumbnail(path){
-  try{
-    const id=String(path).replace(/^drive:/,'');
-    const url=GOOGLE_DRIVE_BACKUP_URL+'?key='+encodeURIComponent(GOOGLE_DRIVE_BACKUP_SECRET)+'&kind=image&file_id='+encodeURIComponent(id)+'&thumb=1';
-    const resp=await fetch(url);
-    if(!resp.ok) throw new Error('โหลดรูป HTTP '+resp.status);
-    const j=await resp.json();
-    if(!j.ok || !j.base64) throw new Error(j.error||'ไม่พบข้อมูลรูป');
-    const src='data:'+(j.mime_type||'image/jpeg')+';base64,'+j.base64;
-    document.querySelectorAll(`img[data-path="${cssEscape(path)}"]`).forEach(img=>img.src=src);
-  }catch(e){
-    console.warn('loadSignedThumbnail:',e);
-    document.querySelectorAll(`img[data-path="${cssEscape(path)}"]`).forEach(img=>img.alt='โหลดรูปไม่สำเร็จ');
+  const key=String(path||'');
+  if(!key)return null;
+  if(imageUrlCache.has(key))return imageUrlCache.get(key);
+  if(imagePromiseCache.has(key))return imagePromiseCache.get(key);
+
+  const promise=(async()=>{
+    try{
+      const id=key.replace(/^drive:/,'');
+      const url=GOOGLE_DRIVE_BACKUP_URL+'?key='+encodeURIComponent(GOOGLE_DRIVE_BACKUP_SECRET)+'&kind=image&file_id='+encodeURIComponent(id)+'&thumb=1';
+      const resp=await fetch(url,{cache:'force-cache'});
+      if(!resp.ok)throw new Error('HTTP '+resp.status);
+      const j=await resp.json();
+      if(!j.ok||!j.base64)throw new Error(j.error||'ไม่พบรูป');
+      const src='data:'+(j.mime_type||'image/jpeg')+';base64,'+j.base64;
+      imageUrlCache.set(key,src);
+      document.querySelectorAll(`img[data-path="${cssEscape(key)}"]`).forEach(img=>img.src=src);
+      return src;
+    }catch(e){
+      console.warn('load image:',e);
+      return null;
+    }finally{
+      imagePromiseCache.delete(key);
+    }
+  })();
+  imagePromiseCache.set(key,promise);
+  return promise;
+}
+
+async function preloadImagesFast(images,concurrency=4){
+  const list=Array.isArray(images)?images:[];
+  const results=new Array(list.length);
+  let cursor=0;
+  async function worker(){
+    while(true){
+      const i=cursor++;
+      if(i>=list.length)return;
+      results[i]=await loadSignedThumbnail(list[i].file_path);
+    }
   }
+  await Promise.all(Array.from({length:Math.min(concurrency,list.length)},worker));
+  return results;
 }
 
 async function loadUsers(){
