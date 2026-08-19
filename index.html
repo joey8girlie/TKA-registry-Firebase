@@ -720,7 +720,19 @@ tbody tr:last-child td{border-bottom:none;}
         </div>
 
         <div class="form-section">
-          <h3><span class="n">6</span> ระยะเวลาผ่าตัด</h3>
+          <h3><span class="n">6</span> Size Implant</h3>
+          <div class="grid grid-3">
+            <div class="field"><label>Femoral</label><input type="text" id="rf-implant_femoral"></div>
+            <div class="field"><label>Tibial</label><input type="text" id="rf-implant_tibial"></div>
+            <div class="field"><label>Gliding surface</label><input type="text" id="rf-implant_gliding_surface"></div>
+          </div>
+          <div class="grid grid-1" style="margin-top:12px;">
+            <div class="field"><label>Note</label><textarea id="rf-implant_note" rows="3" style="width:100%; font-family:var(--sans); font-size:13.5px; padding:8px 10px; border-radius:7px; border:1px solid var(--line);"></textarea></div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3><span class="n">7</span> ระยะเวลาผ่าตัด</h3>
           <div class="grid grid-4">
             <div class="field"><label>เวลาเริ่มผ่าตัด (HH:MM 24 ชม.)</label><input type="text" inputmode="numeric" maxlength="5" placeholder="เช่น 09:30" pattern="^([01][0-9]|2[0-3]):[0-5][0-9]$" id="rf-surgery_start" oninput="maskTimeInput(this); updateDurationPreview('surgery')"></div>
             <div class="field"><label>เวลาเสร็จผ่าตัด (HH:MM 24 ชม.)</label><input type="text" inputmode="numeric" maxlength="5" placeholder="เช่น 11:45" pattern="^([01][0-9]|2[0-3]):[0-5][0-9]$" id="rf-surgery_end" oninput="maskTimeInput(this); updateDurationPreview('surgery')"></div>
@@ -731,7 +743,7 @@ tbody tr:last-child td{border-bottom:none;}
         </div>
 
         <div class="form-section">
-          <h3><span class="n">7</span> Pulse (DP / TP)</h3>
+          <h3><span class="n">8</span> Pulse (DP / TP)</h3>
           <table class="pulse-grid">
             <thead><tr><th></th><th colspan="2">Manual</th><th colspan="2">Digital</th></tr>
             <tr><th></th><th>DP</th><th>TP</th><th>DP</th><th>TP</th></tr></thead>
@@ -755,7 +767,7 @@ tbody tr:last-child td{border-bottom:none;}
         </div>
 
         <div class="form-section">
-          <h3><span class="n">8</span> รูปภาพ</h3>
+          <h3><span class="n">9</span> รูปภาพ</h3>
           <div class="dropzone" onclick="document.getElementById('rf-file-input').click()">
             📷 คลิกเพื่อเลือกรูปภาพ (เลือกได้หลายรูป) — หรือถ่ายรูปจากมือถือได้โดยตรง
             <input type="file" id="rf-file-input" accept="image/*" multiple onchange="handleFileSelect(event)">
@@ -831,7 +843,9 @@ const IMAGE_TYPES = ['Pre-op','Intra-op','Post-op','X-ray','อื่นๆ'];
 const PULSE_FIELDS = ['pre_manual_dp','pre_manual_tp','pre_digital_dp','pre_digital_tp','post_manual_dp','post_manual_tp','post_digital_dp','post_digital_tp'];
 const FORM_FIELDS = ['hn','name_prefix','first_name','last_name','gender','age','weight_kg','height_cm','procedure','surgery_date',
   'hct','hb','egfr','cr','alb','hba1c','tq_mmhg','tq_start','tq_end','tq_duration_min',
-  'extension_lag_deg','varus_deg','valgus_deg','surgery_start','surgery_end','surgery_duration_min',
+  'extension_lag_deg','varus_deg','valgus_deg',
+  'implant_femoral','implant_tibial','implant_gliding_surface','implant_note',
+  'surgery_start','surgery_end','surgery_duration_min',
   'debridement_time_min','suture_time_min', ...PULSE_FIELDS];
 
 let sb = null;
@@ -1126,7 +1140,14 @@ function renderPatientDetailGrouped(rec){
       ]
     },
     {
-      title: '5. เวลาและระยะเวลาผ่าตัด',
+      title: '5. Size Implant',
+      fields: [
+        ['implant_femoral','Femoral'],['implant_tibial','Tibial'],
+        ['implant_gliding_surface','Gliding surface'],['implant_note','Note']
+      ]
+    },
+    {
+      title: '6. เวลาและระยะเวลาผ่าตัด',
       fields: [
         ['surgery_start','เวลาเริ่มผ่าตัด'],['surgery_end','เวลาเสร็จผ่าตัด'],
         ['surgery_duration_min','ระยะเวลาผ่าตัด'],['debridement_time_min','Debridement time'],
@@ -1134,7 +1155,7 @@ function renderPatientDetailGrouped(rec){
       ]
     },
     {
-      title: '6. Pulse',
+      title: '7. Pulse',
       fields: [
         ['pre_manual_dp','Pre-op Manual DP'],['pre_manual_tp','Pre-op Manual TP'],
         ['pre_digital_dp','Pre-op Digital DP'],['pre_digital_tp','Pre-op Digital TP'],
@@ -1143,7 +1164,7 @@ function renderPatientDetailGrouped(rec){
       ]
     },
     {
-      title: '7. รูปภาพ',
+      title: '8. รูปภาพ',
       fields: []
     }
   ];
@@ -1624,16 +1645,49 @@ async function saveRecord(e){
     const {data,error}=await sb.from('records').insert(payload).select('id').single();if(error)throw error;recordId=data.id;
   }
   await backupToGoogleSheets(wasEditing?'record_update':'record_create','records',{...payload,id:recordId});
-  for(const item of pendingNewImages){
-    const path='drive:'+crypto.randomUUID();
-    const up=await sb.storage.from('tka-images').upload(path,item.file);if(up.error)throw up.error;
-    const driveId=up.data.path.replace(/^drive:/,'');
-    const imageRecord={id:crypto.randomUUID(),record_id:recordId,file_path:'drive:'+driveId,image_type:item.type,description:item.description||null,uploaded_by:currentUser.id,drive_file_id:driveId,file_name:item.file.name,mime_type:item.file.type||'image/jpeg',created_at:new Date().toISOString()};
-    const {error}=await sb.from('record_images').insert(imageRecord);if(error)throw error;
-    await backupToGoogleSheets('image_create','record_images',imageRecord);
-  }
+  await uploadPendingImages(recordId);
   showToast('บันทึกข้อมูลเรียบร้อย');pendingNewImages=[];viewDetail(recordId);
  }catch(err){showToast('บันทึกไม่สำเร็จ: '+err.message,true)}finally{btn.disabled=false;btn.textContent='💾 บันทึก'}return false;
+}
+
+/**
+ * Uploads pendingNewImages to Google Drive + Firestore with a few requests
+ * running concurrently (instead of one-at-a-time) so cases with many photos
+ * save much faster. Throws on the first hard failure.
+ */
+async function uploadPendingImages(recordId){
+  const total = pendingNewImages.length;
+  if(!total) return;
+  const CONCURRENCY = 3;
+  let nextIdx = 0, completed = 0;
+  showToast(`กำลังอัปโหลดรูป 0/${total}…`);
+
+  async function worker(){
+    while(nextIdx < pendingNewImages.length){
+      const item = pendingNewImages[nextIdx++];
+      const path = 'drive:'+crypto.randomUUID();
+      const up = await sb.storage.from('tka-images').upload(path, item.file);
+      if(up.error) throw up.error;
+      const driveId = up.data.path.replace(/^drive:/,'');
+      const imageRecord = {
+        id: crypto.randomUUID(), record_id: recordId, file_path: 'drive:'+driveId,
+        image_type: item.type, description: item.description || null,
+        uploaded_by: currentUser.id, drive_file_id: driveId,
+        file_name: item.file.name, mime_type: item.file.type || 'image/jpeg',
+        created_at: new Date().toISOString()
+      };
+      const {error} = await sb.from('record_images').insert(imageRecord);
+      if(error) throw error;
+      // Sheets backup runs in the background — it already reports its own
+      // errors via toast, so it shouldn't block the next image in the queue.
+      backupToGoogleSheets('image_create','record_images',imageRecord);
+      completed++;
+      showToast(`กำลังอัปโหลดรูป ${completed}/${total}…`);
+    }
+  }
+
+  const workerCount = Math.min(CONCURRENCY, total);
+  await Promise.all(Array.from({length: workerCount}, worker));
 }
 
 async function viewDetail(id){
@@ -1889,11 +1943,15 @@ function printPatientReport(record){
     ['4. Alignment',[
       ['Extension lat',deg(r.extension_lag_deg)],['Varus',deg(r.varus_deg)],['Valgus',deg(r.valgus_deg)]
     ]],
-    ['5. เวลาและระยะเวลาผ่าตัด',[
+    ['5. Size Implant',[
+      ['Femoral',r.implant_femoral],['Tibial',r.implant_tibial],
+      ['Gliding surface',r.implant_gliding_surface],['Note',r.implant_note]
+    ]],
+    ['6. เวลาและระยะเวลาผ่าตัด',[
       ['เริ่มผ่าตัด',time(r.surgery_start)],['เสร็จผ่าตัด',time(r.surgery_end)],
       ['ระยะเวลาผ่าตัด',mins(r.surgery_duration_min)],['Debridement',min(r.debridement_time_min)],['Suture',min(r.suture_time_min)]
     ]],
-    ['6. Pulse',[
+    ['7. Pulse',[
       ['Pre Manual DP',r.pre_manual_dp],['Pre Manual TP',r.pre_manual_tp],['Pre Digital DP',r.pre_digital_dp],['Pre Digital TP',r.pre_digital_tp],
       ['Post Manual DP',r.post_manual_dp],['Post Manual TP',r.post_manual_tp],['Post Digital DP',r.post_digital_dp],['Post Digital TP',r.post_digital_tp]
     ]]
