@@ -1727,9 +1727,9 @@ async function loadUsers(){
        <option value="admin" ${u.role==='admin'?'selected':''}>admin</option>
      </select></td>
      <td style="white-space:nowrap;">
-       <button class="btn btn-sm" onclick="showUserAccount(${JSON.stringify(uid)})">ดูรายละเอียด</button>
-       <button class="btn btn-sm" onclick="sendUserPasswordReset(${JSON.stringify(uid)})">รีเซ็ตรหัสผ่าน</button>
-       <button class="btn btn-sm btn-danger" onclick="deleteUserAccount(${JSON.stringify(uid)})" ${self?'disabled':''}>ลบ User</button>
+       <button class="btn btn-sm" onclick="showUserAccount('${safeUid}')">ดูรายละเอียด</button>
+       <button class="btn btn-sm" onclick="sendUserPasswordReset('${safeUid}')">รีเซ็ตรหัสผ่าน</button>
+       <button class="btn btn-sm btn-danger" onclick="deleteUserAccount('${safeUid}')" ${self?'disabled':''}>ลบ User</button>
      </td>
    </tr>`;
  }).join('');
