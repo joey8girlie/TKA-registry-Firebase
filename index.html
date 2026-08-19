@@ -297,48 +297,7 @@ tbody tr:last-child td{border-bottom:none;}
 
 
 @media print{
-  @page{size:A4 portrait;margin:8mm 9mm 8mm 9mm}
-  html,body{width:210mm;height:297mm;background:#fff !important;color:#111 !important;overflow:hidden !important}
-  body{font-family:Arial,"Noto Sans Thai",sans-serif;font-size:7.6pt;line-height:1.2}
-  #app-shell{display:block !important}
-  #app-shell > .topbar,#config-warning,main > .view > .page-head .btn,.no-print,#bottom-nav,
-  #view-list,#view-form,#view-users,#toast,#lightbox{display:none !important}
-  main{max-width:100% !important;padding:0 !important;margin:0 !important}
-  #view-detail{display:block !important;margin:0 !important;padding:0 !important}
-  #view-detail .page-head{display:block !important;margin:0 0 2.5mm !important;padding:0 0 1.5mm !important;border-bottom:0.5mm solid #222}
-  #detail-title{font-size:14pt !important;margin:0 !important;line-height:1.1}
-  #detail-sub{font-size:7.6pt !important;margin:0.6mm 0 0 !important;color:#444 !important}
-  #view-detail .card{box-shadow:none !important;border:0 !important;border-radius:0 !important;padding:0 !important;margin:0 !important}
-
-  /* ---- grouped detail (matches actual rendered markup) ---- */
-  #detail-body{font-size:7.6pt !important}
-  .patient-detail-group{margin:0 0 1.6mm !important;border:0.2mm solid #ccc !important;border-radius:0.8mm !important;overflow:hidden;break-inside:avoid;page-break-inside:avoid}
-  .patient-detail-group-title{padding:1mm 2mm !important;font-size:8pt !important;background:#eef1f3 !important;border-bottom:0.2mm solid #ccc !important;font-weight:700 !important}
-  .patient-detail-group-body{padding:1.3mm 1.8mm !important;gap:1mm !important;grid-template-columns:repeat(4,minmax(0,1fr)) !important}
-  .patient-detail-item{padding:0.8mm 1.3mm !important;border:0.2mm solid #eee !important;border-radius:0.6mm !important;background:#fafbfc !important;break-inside:avoid}
-  .patient-detail-item .label{font-size:5.8pt !important;color:#666 !important;margin-bottom:0.2mm !important}
-  .patient-detail-item .value{font-size:7.4pt !important;line-height:1.15 !important}
-
-  /* ---- item 6: Pulse comparison table ---- */
-  .patient-detail-group-body.pulse-body{display:block !important;padding:1.3mm 1.8mm !important}
-  .pulse-compare-table{font-size:7.4pt !important}
-  .pulse-compare-table th,.pulse-compare-table td{padding:0.8mm 1.6mm !important}
-
-  #detail-gallery-card{display:block !important;margin-top:1.6mm !important}
-  #detail-gallery-card h3{font-size:8pt !important;margin:0 0 1mm !important}
-  #detail-gallery{display:grid !important;grid-template-columns:repeat(6,1fr) !important;gap:1.5mm !important}
-  #detail-gallery > div{break-inside:avoid;text-align:center}
-  #detail-gallery img{width:100% !important;height:16mm !important;object-fit:cover !important;border-radius:0.8mm !important}
-  #detail-gallery .gcap{font-size:5.8pt !important;color:#555 !important;margin-top:.4mm !important}
-  #print-footer{display:block !important;margin-top:1.5mm !important;padding-top:1mm;border-top:.2mm solid #bbb;font-size:5.8pt;color:#666;text-align:right}
-}
-#print-footer{display:none}
-
-@media print{
-  #app-shell > .topbar, #config-warning, main > .view > .page-head .btn, .no-print, #bottom-nav{display:none !important;}
-  main{max-width:100%; padding:0;}
-  body{background:#fff;}
-  .card{box-shadow:none; border:none;}
+  #app-shell{display:none !important;}
 }
 
 /* ---------- role status banners ---------- */
@@ -450,16 +409,39 @@ tbody tr:last-child td{border-bottom:none;}
   .patient-detail-group{break-inside:avoid}
 }
 
-/* Pulse (item 6) — Pre-op vs Post-op comparison table */
-.patient-detail-group-body.pulse-body{display:block;padding:10px;}
-.pulse-compare-table{width:100%;border-collapse:collapse;font-size:13px;}
-.pulse-compare-table th,.pulse-compare-table td{padding:7px 10px;border:1px solid #eef0f3;text-align:center;}
-.pulse-compare-table thead th{background:#f5f7fa;font-weight:700;color:#374151;}
-.pulse-compare-table tbody tr:nth-child(even) td{background:#fbfbfc;}
-.pulse-compare-table td.pt-label{text-align:left;font-weight:600;color:#374151;background:#fafbfc;}
-.pulse-compare-table tbody td:not(.pt-label){font-family:var(--mono);font-weight:600;}
-@media(max-width:520px){.pulse-compare-table{font-size:12px;} .pulse-compare-table th,.pulse-compare-table td{padding:6px 6px;}}
 
+/* ===== A4 one-page patient report ===== */
+@media print{
+  @page{size:A4 portrait;margin:9mm}
+  body{background:#fff!important}
+  body *{visibility:hidden!important}
+  #print-report,#print-report *{visibility:visible!important}
+  #print-report{
+    display:block!important;
+    position:absolute!important;
+    left:0!important;top:0!important;
+    width:192mm!important;
+    background:#fff!important;
+    color:#111!important;
+    font-family:Arial,"Noto Sans Thai",sans-serif!important;
+    font-size:8.3pt!important;
+    line-height:1.2!important;
+  }
+  #print-report .report-header{border-bottom:1.5px solid #111;padding-bottom:2mm;margin-bottom:2mm}
+  #print-report h1{font-size:14pt!important;margin:0 0 1mm!important}
+  #print-report h2{font-size:9pt!important;margin:2mm 0 1mm!important;border-bottom:1px solid #bbb;padding-bottom:.6mm}
+  #print-report .meta{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5mm;margin-bottom:1.5mm;font-size:8.5pt}
+  #print-report .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1mm 3mm}
+  #print-report .cell{display:flex;gap:1.5mm}
+  #print-report .label{font-weight:700;min-width:24mm}
+  #print-report .value{word-break:break-word}
+  #print-report .footer{margin-top:3mm;font-size:7pt;color:#444}
+}
+#print-report{display:none}
+
+.admin-account-row{display:grid;grid-template-columns:1.1fr 1.6fr .8fr auto;gap:8px;align-items:center;padding:10px;border-bottom:1px solid #e5e7eb}
+.admin-account-actions{display:flex;gap:6px;flex-wrap:wrap}
+@media(max-width:700px){.admin-account-row{grid-template-columns:1fr}.admin-account-actions{margin-top:4px}}
 </style>
 </head>
 <body>
@@ -516,7 +498,7 @@ tbody tr:last-child td{border-bottom:none;}
           <path d="M6.5 3.2c1.5 0 2.7 1.2 2.7 2.7 0 .4-.1.8-.2 1.1l6.4 6.4c.3-.1.7-.2 1.1-.2 1.5 0 2.7 1.2 2.7 2.7s-1.2 2.7-2.7 2.7c-1.5 0-2.7-1.2-2.7-2.7 0-.4.1-.8.2-1.1L7.6 8.4c-.3.1-.7.2-1.1.2-1.5 0-2.7-1.2-2.7-2.7s1.2-2.7 2.7-2.7z" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
         </svg>
       </div>
-      <div class="titles"><b>TKA Registry</b><span>v2 · Total Knee Arthroplasty</span></div>
+      <div class="titles"><b>TKA Registry</b><span>v2 · Firebase + Drive</span></div>
     </div>
     <div class="nav-tabs">
       <button data-view="dashboard" class="active" onclick="showView('dashboard')">แดชบอร์ด</button>
@@ -735,7 +717,7 @@ tbody tr:last-child td{border-bottom:none;}
       <div class="page-head">
         <div><h1 id="detail-title">รายละเอียดผู้ป่วย</h1><p id="detail-sub"></p></div>
         <div style="display:flex; gap:8px;">
-          <button class="btn" onclick="window.print()">🖨 พิมพ์</button>
+          <button class="btn" onclick="printPatientReport(window.currentPatientRecord||window.currentRecord||{});">🖨 พิมพ์</button>
           <button class="btn btn-accent role-gate gate-hidden" id="detail-edit-btn">✎ แก้ไข</button>
           <button class="btn btn-danger admin-gate gate-hidden" id="detail-delete-btn">🗑 ลบ</button>
         </div>
@@ -751,12 +733,12 @@ tbody tr:last-child td{border-bottom:none;}
     <!-- ===== USERS (admin) ===== -->
     <section class="view" id="view-users">
       <div class="page-head">
-        <div><h1>ผู้ใช้งาน</h1><p>จัดการสิทธิ์ผู้ใช้งานในระบบ (Admin เท่านั้น)</p></div>
+        <div><h1>ผู้ใช้งาน</h1><p>จัดการบัญชีผู้ใช้งานในระบบ (Admin เท่านั้น) — Email ดูได้, รหัสผ่านจะไม่แสดงเพื่อความปลอดภัย</p></div>
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>ชื่อ-สกุล</th><th>User ID</th><th>สมัครเมื่อ</th><th>สิทธิ์ (Role)</th></tr></thead>
-          <tbody id="users-tbody"><tr><td colspan="4"><div class="loading"><span class="spinner"></span> กำลังโหลด…</div></td></tr></tbody>
+          <thead><tr><th>ชื่อ-สกุล</th><th>Username</th><th>Email</th><th>สมัครเมื่อ</th><th>สิทธิ์ (Role)</th><th>จัดการ</th></tr></thead>
+          <tbody id="users-tbody"><tr><td colspan="6"><div class="loading"><span class="spinner"></span> กำลังโหลด…</div></td></tr></tbody>
         </table>
       </div>
     </section>
@@ -764,7 +746,7 @@ tbody tr:last-child td{border-bottom:none;}
 </div>
 
 <div id="toast"></div>
-<div id="lightbox" onclick="closeLightbox()"><button class="lb-close" onclick="closeLightbox()">✕</button><img id="lightbox-img" alt=""></div>
+<div id="lightbox" onclick="closeLightbox()"><button class="lb-close" onclick="closeLightbox()">✕</button><img id="lightbox-img"></div>
 
 <script>
 /* ============================================================
@@ -782,27 +764,16 @@ const FIREBASE_CONFIG = {
 };
 
 // Google Apps Script Web App used ONLY for Google Drive images + Sheets backup.
-const GOOGLE_DRIVE_BACKUP_URL = 'https://script.google.com/macros/s/AKfycbxQnsenzEW42WT2w_uZ5ZBBrhzxNOaZkR7A-u9ejsprxlqgQuUEwph7w55OzURA43TXkA/exec';
+const GOOGLE_DRIVE_BACKUP_URL = 'https://script.google.com/macros/s/AKfycbygnEK15on9betrkUGeqevgJ3OFoftFHFn7Q7xmb0db0y90vMoStiGHdQLtCwQ8EdB6/exec';
 const GOOGLE_DRIVE_BACKUP_SECRET = 'My_Webhook_Secret_Is_260625_ORSMH';
+const ADMIN_BACKEND_URL = 'https://tka-admin-backend-781991892767.asia-southeast1.run.app';
 
 const IMAGE_TYPES = ['Pre-op','Intra-op','Post-op','X-ray','อื่นๆ'];
 const PULSE_FIELDS = ['pre_manual_dp','pre_manual_tp','pre_digital_dp','pre_digital_tp','post_manual_dp','post_manual_tp','post_digital_dp','post_digital_tp'];
 const FORM_FIELDS = ['hn','name_prefix','first_name','last_name','gender','age','weight_kg','height_cm','procedure','surgery_date',
-  'hct','hb','egfr','cr','alb','hba1c','tq_mmhg','tq_start','tq_end',
-  'extension_lag_deg','varus_deg','valgus_deg','surgery_start','surgery_end',
+  'hct','hb','egfr','cr','alb','hba1c','tq_mmhg','tq_start','tq_end','tq_duration_min',
+  'extension_lag_deg','varus_deg','valgus_deg','surgery_start','surgery_end','surgery_duration_min',
   'debridement_time_min','suture_time_min', ...PULSE_FIELDS];
-
-const DETAIL_LABELS = {
-  hn:'HN', name_prefix:'คำนำหน้า', first_name:'ชื่อ', last_name:'นามสกุล', full_name:'ชื่อ-สกุล',
-  gender:'เพศ', age:'อายุ', weight_kg:'น้ำหนัก (กก.)', height_cm:'ส่วนสูง (ซม.)', bmi:'BMI',
-  procedure:'Procedure', surgery_date:'วันที่ผ่าตัด', hct:'Hct', hb:'Hb', egfr:'eGFR', cr:'Cr',
-  alb:'Alb', hba1c:'HbA1C', tq_mmhg:'TQ (mmHg)', tq_start:'TQ Start', tq_end:'TQ End',
-  tq_duration_min:'TQ Duration', extension_lag_deg:'Extension lat (°)', varus_deg:'Varus (°)',
-  valgus_deg:'Valgus (°)', surgery_start:'เวลาเริ่มผ่าตัด', surgery_end:'เวลาเสร็จผ่าตัด',
-  surgery_duration_min:'ระยะเวลาผ่าตัด', debridement_time_min:'Debridement time', suture_time_min:'Suture time',
-  pre_manual_dp:'Pre Manual DP', pre_manual_tp:'Pre Manual TP', pre_digital_dp:'Pre Digital DP', pre_digital_tp:'Pre Digital TP',
-  post_manual_dp:'Post Manual DP', post_manual_tp:'Post Manual TP', post_digital_dp:'Post Digital DP', post_digital_tp:'Post Digital TP'
-};
 
 let sb = null;
 let currentUser = null;
@@ -827,6 +798,7 @@ class FBQuery {
   order(f,opt={}){this._order={f,asc:opt.ascending!==false};return this}
   limit(n){this._limit=n;return this}
   range(a,b){this._range=[a,b];return this}
+  in(f,vals){this.filters.push({op:'in',f,v:vals});return this}
   maybeSingle(){this._maybe=true;this._single=true;return this}
   single(){this._single=true;return this}
   then(resolve,reject){return this.run().then(resolve,reject)}
@@ -875,6 +847,7 @@ class FBQuery {
         if(f.op==='eq') return String(x??'')===String(f.v??'');
         if(f.op==='gte') return String(x??'')>=String(f.v??'');
         if(f.op==='lte') return String(x??'')<=String(f.v??'');
+        if(f.op==='in') return (f.v||[]).map(String).includes(String(x??''));
         if(f.op==='ilike'){
           const pat=String(f.v).replace(/^%|%$/g,'').toLowerCase();
           return String(x??'').toLowerCase().includes(pat);
@@ -893,6 +866,16 @@ class FBQuery {
 }
 
 function fbError(message){return {message};}
+const firebaseAdapter = {
+  async setDoc(ref,data,opts){ return firebase.setDoc(ref,data,opts||{}); },
+  doc: (...a)=>firebase.doc(...a),
+  collection: (...a)=>firebase.collection(...a),
+  query: (...a)=>firebase.query(...a),
+  where: (...a)=>firebase.where(...a),
+  getDocs: (...a)=>firebase.getDocs(...a),
+  updateDoc: (...a)=>firebase.updateDoc(...a),
+  deleteDoc: (...a)=>firebase.deleteDoc(...a)
+};
 
 const sbAdapter = {
   from(table){
@@ -972,11 +955,11 @@ window.addEventListener('DOMContentLoaded',()=>{
   const s=document.createElement('script');
   s.type='module';
   s.textContent=`import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js';
-import { getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,updateProfile } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js';
+import { getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,updateProfile,sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js';
 import { getFirestore,collection,doc,setDoc,getDocs,query,where,updateDoc,deleteDoc } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js';
 const cfg=${JSON.stringify(FIREBASE_CONFIG)};
 const app=initializeApp(cfg); const auth=getAuth(app); const db=getFirestore(app);
-window.__fb={app,auth,db,collection,doc,setDoc,getDocs,query,where,updateDoc,deleteDoc,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,updateProfile,onAuthStateChanged};`;
+window.__fb={app,auth,db,collection,doc,setDoc,getDocs,query,where,updateDoc,deleteDoc,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,updateProfile,sendPasswordResetEmail,onAuthStateChanged};`;
   document.head.appendChild(s);
   const timer=setInterval(()=>{
     if(window.__fb){
@@ -989,8 +972,15 @@ window.__fb={app,auth,db,collection,doc,setDoc,getDocs,query,where,updateDoc,del
 });
 
 function restoreLastView(){
-  try{const last=localStorage.getItem('tka_last_view');if(['list','form','detail'].includes(last)&&currentUser)showView(last)}catch(e){}
+  try{
+    const last=localStorage.getItem('tka_last_view');
+    const rid=localStorage.getItem('tka_last_record_id');
+    if(!currentUser) return;
+    if(last==='detail' && rid){ viewDetail(rid); return; }
+    if(['list','form'].includes(last)) showView(last);
+  }catch(e){}
 }
+
 
 function switchAuthTab(tab){
   document.getElementById('tab-signin').classList.toggle('active', tab==='signin');
@@ -1001,6 +991,8 @@ function switchAuthTab(tab){
   document.getElementById('auth-msg').textContent = '';
 }
 
+
+
 function translateAuthError(msg){
   if(/invalid login credentials/i.test(msg)) return 'Username หรือรหัสผ่านไม่ถูกต้อง';
   if(/already registered/i.test(msg)) return 'อีเมลนี้ถูกใช้สมัครแล้ว';
@@ -1008,15 +1000,22 @@ function translateAuthError(msg){
   return msg;
 }
 
+
+
 function showAuthScreen(){
   document.getElementById('auth-screen').style.display = 'flex';
   document.getElementById('app-shell').style.display = 'none';
   currentUser = null; currentProfile = null;
 }
 
+
+
 function retryLoadProfile(){ loadProfileWithRetry(); }
 
+
+
 function applyRoleUI(){
+  // normalize กันเคส role เป็น 'Admin' / มีช่องว่างติดมา แล้วเทียบไม่ตรง
   const rawRole = currentProfile?.role || null;
   const role = rawRole ? String(rawRole).trim().toLowerCase() : null;
   document.getElementById('user-role-badge').textContent = rawRole || '?';
@@ -1028,8 +1027,13 @@ function applyRoleUI(){
   });
   document.getElementById('nav-users-btn').classList.toggle('hidden', role !== 'admin');
   document.getElementById('bn-users-btn').classList.toggle('hidden', role !== 'admin');
+  // ปุ่ม "ตั้งเป็นแอดมิน" โชว์ให้ทุกคนที่ยังไม่ใช่ admin กด (ฟังก์ชันฝั่ง DB จะเช็คเองว่ามี admin แล้วหรือยัง)
   document.getElementById('claim-admin-btn').style.display = (role !== 'admin') ? '' : 'none';
 }
+
+/* ---------------- NAV ---------------- */
+
+
 
 function renderPatientDetailGrouped(rec){
   const body = document.getElementById('detail-body');
@@ -1069,16 +1073,20 @@ function renderPatientDetailGrouped(rec){
         ['surgery_duration_min','ระยะเวลาผ่าตัด'],['debridement_time_min','Debridement time'],
         ['suture_time_min','Suture time']
       ]
+    },
+    {
+      title: '6. Pulse',
+      fields: [
+        ['pre_manual_dp','Pre-op Manual DP'],['pre_manual_tp','Pre-op Manual TP'],
+        ['pre_digital_dp','Pre-op Digital DP'],['pre_digital_tp','Pre-op Digital TP'],
+        ['post_manual_dp','Post-op Manual DP'],['post_manual_tp','Post-op Manual TP'],
+        ['post_digital_dp','Post-op Digital DP'],['post_digital_tp','Post-op Digital TP']
+      ]
+    },
+    {
+      title: '7. รูปภาพ',
+      fields: []
     }
-  ];
-
-  // Item 6 "Pulse" is rendered as a Pre-op vs Post-op comparison table
-  // instead of a plain field grid.
-  const pulseRows = [
-    ['Manual DP','pre_manual_dp','post_manual_dp'],
-    ['Manual TP','pre_manual_tp','post_manual_tp'],
-    ['Digital DP','pre_digital_dp','post_digital_dp'],
-    ['Digital TP','pre_digital_tp','post_digital_tp']
   ];
 
   const valueFor = (key) => {
@@ -1090,47 +1098,28 @@ function renderPatientDetailGrouped(rec){
     return String(v);
   };
 
-  const groupsHtml = groups.map((g) => `
+  body.innerHTML = groups.map((g, i) => `
     <section class="patient-detail-group">
       <div class="patient-detail-group-title">${g.title}</div>
-      <div class="patient-detail-group-body">
+      ${g.fields.length ? `<div class="patient-detail-group-body">
         ${g.fields.map(([key,label]) => `
           <div class="patient-detail-item">
             <div class="label">${label}</div>
             <div class="value">${escapeHtml(valueFor(key))}</div>
           </div>
         `).join('')}
-      </div>
+      </div>` : `<div class="patient-detail-group-body" id="detail-images-group"></div>`}
     </section>
   `).join('');
 
-  const pulseHtml = `
-    <section class="patient-detail-group">
-      <div class="patient-detail-group-title">6. Pulse (DP / TP)</div>
-      <div class="patient-detail-group-body pulse-body">
-        <table class="pulse-compare-table">
-          <thead>
-            <tr><th>รายการ</th><th>Pre-op</th><th>Post-op</th></tr>
-          </thead>
-          <tbody>
-            ${pulseRows.map(([label,preKey,postKey]) => `
-              <tr>
-                <td class="pt-label">${label}</td>
-                <td>${escapeHtml(valueFor(preKey))}</td>
-                <td>${escapeHtml(valueFor(postKey))}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-    </section>
-  `;
-
-  body.innerHTML = groupsHtml + pulseHtml;
+  // Reuse the existing image renderer if present.
+  if(typeof renderDetailImages === 'function') renderDetailImages(rec);
 }
 
+
+
 function showView(name){
-  try{ localStorage.setItem('tka_last_view', name); }catch(e){}
+  try{ localStorage.setItem('tka_last_view', name); if(name!=='detail') localStorage.removeItem('tka_last_record_id'); }catch(e){}
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-' + name).classList.add('active');
   document.querySelectorAll('.nav-tabs button, #bottom-nav button').forEach(b => b.classList.toggle('active', b.dataset.view === name));
@@ -1140,6 +1129,8 @@ function showView(name){
   if(name === 'users') loadUsers();
 }
 
+
+
 function showToast(msg, isErr){
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -1148,10 +1139,15 @@ function showToast(msg, isErr){
   t._timer = setTimeout(() => t.classList.remove('show'), 3200);
 }
 
+/* ---------------- DASHBOARD ---------------- */
+
+
 function debouncedLoadList(){
   clearTimeout(listDebounceTimer);
   listDebounceTimer = setTimeout(loadList, 350);
 }
+
+
 
 function clearFilters(){
   document.getElementById('f-search').value = '';
@@ -1160,6 +1156,8 @@ function clearFilters(){
   document.getElementById('f-date-to').value = '';
   loadList();
 }
+
+
 
 async function loadList(){
   const tbody = document.getElementById('list-tbody');
@@ -1183,6 +1181,8 @@ async function loadList(){
   document.getElementById('list-count').textContent = `พบ ${count ?? data.length} รายการ${(count && count>300)?' (แสดง 300 รายการล่าสุด — ใช้ตัวกรองเพื่อค้นหาให้แคบลง)':''}`;
 }
 
+
+
 function procedureTag(p){
   if(p === 'TKA Rt.') return `<span class="tag tag-rt">TKA Rt.</span>`;
   if(p === 'TKA Lt.') return `<span class="tag tag-lt">TKA Lt.</span>`;
@@ -1190,15 +1190,20 @@ function procedureTag(p){
   return '—';
 }
 
+
 function formatDate(d){
   if(!d) return '—';
   const dt = new Date(d + 'T00:00:00');
   return dt.toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' });
 }
 
+
 function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+
+/* ---------------- FORM (add/edit) ---------------- */
+
 
 function updateBMIPreview(){
   const w = parseFloat(document.getElementById('rf-weight_kg').value);
@@ -1206,6 +1211,8 @@ function updateBMIPreview(){
   const el = document.getElementById('rf-bmi-preview');
   if(w>0 && h>0){ el.value = (w / Math.pow(h/100,2)).toFixed(2); } else { el.value=''; }
 }
+
+
 
 function timeDiffMinutes(start, end){
   if(!start || !end) return null;
@@ -1217,21 +1224,24 @@ function timeDiffMinutes(start, end){
   return mins;
 }
 
+
 function maskTimeInput(el){
+  // พิมพ์เลขล้วน แล้วจัดรูปแบบเป็น HH:MM (24 ชม.) ให้อัตโนมัติ ไม่ขึ้นกับ locale เครื่อง
   let digits = el.value.replace(/\D/g,'').slice(0,4);
   if(digits.length >= 3) el.value = digits.slice(0,2) + ':' + digits.slice(2);
   else el.value = digits;
 }
+
 
 function formatDuration(mins){
   if(mins === null || mins === undefined || mins === '') return '—';
   const m = Math.round(Number(mins));
   if(isNaN(m) || m < 0) return '—';
   const h = Math.floor(m/60), r = m%60;
-  if(h === 0) return `${r} นาที`;
-  if(r === 0) return `${h} ชม.`;
-  return `${h} ชม. ${r} นาที`;
+  return `${String(h).padStart(2,'0')}:${String(r).padStart(2,'0')} ชม.`;
 }
+
+
 
 function getPatientFullName(record){
   const parts = [record.name_prefix, record.first_name, record.last_name]
@@ -1239,6 +1249,27 @@ function getPatientFullName(record){
     .filter(Boolean);
   return parts.join(' ') || record.full_name || record.hn || '-';
 }
+
+
+
+function formatClockTime(v){
+  if(!v) return '—';
+  const s = String(v).slice(0,5);
+  return /^\d{2}:\d{2}$/.test(s) ? s : String(v);
+}
+
+
+
+function formatDetailValue(key, value){
+  if(value === null || value === undefined || value === '') return '—';
+  if(key === 'surgery_date') return formatDate(value);
+  if(key === 'tq_start' || key === 'tq_end' || key === 'surgery_start' || key === 'surgery_end') return formatClockTime(value);
+  if(key === 'tq_duration_min' || key === 'surgery_duration_min') return formatDuration(value);
+  if(key === 'extension_lag_deg' || key === 'varus_deg' || key === 'valgus_deg') return `${value} °`;
+  if(key === 'debridement_time_min' || key === 'suture_time_min') return `${value} นาที`;
+  return String(value);
+}
+
 
 function updateDurationPreview(which){
   if(which === 'tq'){
@@ -1249,6 +1280,8 @@ function updateDurationPreview(which){
     document.getElementById('rf-surgery-duration-preview').value = m===null ? '' : formatDuration(m);
   }
 }
+
+
 
 function resetForm(){
   editingId = null;
@@ -1261,6 +1294,8 @@ function resetForm(){
   document.getElementById('new-image-grid').innerHTML = '';
   document.getElementById('existing-image-grid').innerHTML = '';
 }
+
+
 
 function renderExistingImages(images){
   const grid = document.getElementById('existing-image-grid');
@@ -1279,21 +1314,64 @@ function renderExistingImages(images){
   images.forEach(img => loadSignedThumbnail(img.file_path));
 }
 
+
+
 function getPublicOrSignedUrlPlaceholder(){
   return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="150" height="110"><rect width="100%" height="100%" fill="%23EFF3F2"/></svg>');
 }
 
+
+
 function cssEscape(s){ return String(s).replace(/["\\]/g,'\\$&'); }
 
-function handleFileSelect(e){
+
+
+async function compressImageFile(file, maxDim=1600, quality=0.75){
+  // เก็บไฟล์ที่ไม่ใช่รูปแบบภาพทั่วไป (เช่น svg) ไว้แบบเดิม ไม่บีบอัด
+  if(!file.type || !file.type.startsWith('image/') || file.type === 'image/svg+xml') return file;
+  try{
+    const bitmap = await createImageBitmap(file);
+    let { width, height } = bitmap;
+    if(width > maxDim || height > maxDim){
+      const scale = maxDim / Math.max(width, height);
+      width = Math.round(width * scale);
+      height = Math.round(height * scale);
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = width; canvas.height = height;
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, width, height);
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
+    if(!blob || blob.size >= file.size) return file; // ถ้าบีบแล้วไม่ได้เล็กลง ใช้ไฟล์เดิม
+    const newName = file.name.replace(/\.\w+$/, '') + '.jpg';
+    return new File([blob], newName, { type: 'image/jpeg' });
+  }catch(e){
+    console.warn('บีบอัดรูปไม่สำเร็จ ใช้ไฟล์ต้นฉบับแทน:', e);
+    return file;
+  }
+}
+
+async function handleFileSelect(e){
   const files = Array.from(e.target.files || []);
-  files.forEach(file => {
+  e.target.value = '';
+  if(!files.length) return;
+  let originalTotal = 0, compressedTotal = 0;
+  for(const original of files){
+    originalTotal += original.size;
+    const file = await compressImageFile(original);
+    compressedTotal += file.size;
     const previewUrl = URL.createObjectURL(file);
     pendingNewImages.push({ file, previewUrl, type: 'Pre-op', description: '' });
-  });
-  e.target.value = '';
+  }
   renderNewImages();
+  if(originalTotal > 0){
+    const savedPct = Math.round((1 - compressedTotal / originalTotal) * 100);
+    if(savedPct > 5){
+      showToast(`บีบอัดรูปภาพแล้ว ลดขนาดลง ${savedPct}% (${(originalTotal/1024/1024).toFixed(1)}MB → ${(compressedTotal/1024/1024).toFixed(1)}MB)`);
+    }
+  }
 }
+
+
 
 function renderNewImages(){
   const grid = document.getElementById('new-image-grid');
@@ -1311,18 +1389,15 @@ function renderNewImages(){
   `).join('');
 }
 
+
 function removePendingImage(idx){ pendingNewImages.splice(idx,1); renderNewImages(); }
+
+
 
 function closeLightbox(){ document.getElementById('lightbox').style.display = 'none'; }
 
-async function openLightboxByPath(path){
-  const lb = document.getElementById('lightbox');
-  const img = document.getElementById('lightbox-img');
-  lb.style.display = 'flex';
-  img.src = getPublicOrSignedUrlPlaceholder();
-  const { data } = await sb.storage.from('tka-images').createSignedUrl(path, 3600);
-  if(data) img.src = data.signedUrl;
-}
+
+
 
 async function exportCSV(){
   showToast('กำลังเตรียมไฟล์ CSV…');
@@ -1348,19 +1423,30 @@ async function exportCSV(){
   showToast(`Export สำเร็จ (${full.length} รายการ)`);
 }
 
+
 function csvEscape(v){
   if(v === null || v === undefined) return '';
   const s = String(v);
   return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
 }
 
+/* ---------------- USERS (admin) ---------------- */
+
+
 async function handleSignIn(e){
  e.preventDefault(); const errEl=document.getElementById('auth-error'); errEl.textContent='';
  const btn=document.getElementById('si-btn'); btn.disabled=true; btn.textContent='กำลังเข้าสู่ระบบ…';
  const username=document.getElementById('si-email').value.trim(), password=document.getElementById('si-password').value;
  if(!/^[A-Za-z][A-Za-z0-9._-]{2,31}$/.test(username)){errEl.textContent='Username ต้องเป็นภาษาอังกฤษเท่านั้น และยาว 3–32 ตัวอักษร';btn.disabled=false;btn.textContent='เข้าสู่ระบบ';return false;}
- const email=username.toLowerCase()+'@tka-registry.local';
- const {error}=await sb.auth.signInWithPassword({email,password});
+ const {data:lookupEmail}=await sb.rpc('lookup_login_email',{p_username:username});
+ const realEmail=lookupEmail || '';
+ const aliasEmail=username.toLowerCase()+'@tka-registry.local';
+ let result=await sb.auth.signInWithPassword({email:realEmail || aliasEmail,password});
+ // Backward compatibility for accounts created in the earlier alias-email version.
+ if(result.error && realEmail && realEmail.toLowerCase()!==aliasEmail.toLowerCase()){
+   result=await sb.auth.signInWithPassword({email:aliasEmail,password});
+ }
+ const {error}=result;
  btn.disabled=false;btn.textContent='เข้าสู่ระบบ'; if(error) errEl.textContent='Username หรือรหัสผ่านไม่ถูกต้อง'; return false;
 }
 
@@ -1370,22 +1456,29 @@ async function handleSignUp(e){
  const full_name=document.getElementById('su-name').value.trim(),username=document.getElementById('su-username').value.trim(),email=document.getElementById('su-email').value.trim(),password=document.getElementById('su-password').value;
  if(!/^[A-Za-z][A-Za-z0-9._-]{2,31}$/.test(username)){err.textContent='Username ต้องเป็นภาษาอังกฤษเท่านั้น และยาว 3–32 ตัวอักษร';btn.disabled=false;btn.textContent='สมัครสมาชิก';return false;}
  const {data:exists}=await sb.rpc('username_exists',{p_username:username}); if(exists){err.textContent='Username นี้ถูกใช้แล้ว';btn.disabled=false;btn.textContent='สมัครสมาชิก';return false;}
- const authEmail=username.toLowerCase()+'@tka-registry.local';
+ const authEmail=email;
  const {data,error}=await sb.auth.signUp({email:authEmail,password,options:{data:{full_name,username,contact_email:email}}});
  if(error){err.textContent=translateAuthError(error.message||'สมัครสมาชิกไม่สำเร็จ');btn.disabled=false;btn.textContent='สมัครสมาชิก';return false;}
  if(data?.user){
    const now=new Date().toISOString();
-   const {data:existing}=await sb.from('profiles').select('*');
-   const hasAdmin=(existing||[]).some(p=>String(p.role||'').toLowerCase()==='admin');
-   const role=hasAdmin?'viewer':'admin'; // คนแรกในระบบเท่านั้นที่ได้ admin อัตโนมัติ คนถัดไปเป็น viewer รอแอดมินปรับสิทธิ์
-   await sb.from('profiles').insert({id:data.user.uid||data.user.id,email,username,full_name,role,created_at:now});
+   await sb.from('profiles').insert({id:data.user.uid||data.user.id,email,username,full_name,role:'viewer',created_at:now});
    await sb.from('login_lookup').insert({id:username.toLowerCase(),username,username_lower:username.toLowerCase(),email,uid:data.user.uid||data.user.id,created_at:now});
  }
  msg.textContent='สมัครสมาชิกสำเร็จ — สามารถเข้าสู่ระบบด้วย Username ได้';
  btn.disabled=false;btn.textContent='สมัครสมาชิก';return false;
 }
 
-async function handleSignOut(){await sb.auth.signOut();showAuthScreen();}
+async function handleSignOut(){try{localStorage.removeItem('tka_last_view');localStorage.removeItem('tka_last_record_id')}catch(e){} await sb.auth.signOut();showAuthScreen();}
+
+async function changeUsername(){
+ const current=(currentProfile?.username||'').trim(),u=prompt('ตั้ง Username ใหม่ (ภาษาอังกฤษเท่านั้น)',current); if(u===null)return;
+ const n=u.trim();if(!/^[A-Za-z][A-Za-z0-9._-]{2,31}$/.test(n)){showToast('Username ต้องเป็นภาษาอังกฤษเท่านั้น และยาว 3–32 ตัวอักษร',true);return;}
+ const {data:exists}=await sb.rpc('username_exists',{p_username:n});if(exists){showToast('Username นี้ถูกใช้แล้ว',true);return;}
+ await sb.from('login_lookup').delete().eq('id',current.toLowerCase());
+ await sb.from('login_lookup').insert({id:n.toLowerCase(),username:n,username_lower:n.toLowerCase(),email:currentUser.email,uid:currentUser.id,created_at:new Date().toISOString()});
+ await sb.from('profiles').update({username:n}).eq('id',currentUser.id);
+ currentProfile.username=n;showToast('เปลี่ยน Username แล้ว');applyRoleUI();
+}
 
 async function handleAuthed(user){
  currentUser={id:user.uid||user.id,email:user.email,user_metadata:{username:''},user};
@@ -1414,7 +1507,7 @@ function buildListQuery(){
 async function loadDashboard(){
  const strip=document.getElementById('vitals-strip'),chart=document.getElementById('monthly-chart');
  const {data}=await sb.from('records').select('*');const rows=data||[];
- const avg=rows.length?rows.reduce((a,r)=>a+(parseFloat(r.bmi)||0),0)/rows.filter(r=>r.bmi).length:0;
+ const bmiRows=rows.map(r=>parseFloat(r.bmi)).filter(n=>Number.isFinite(n)&&n>0);const avg=bmiRows.length?bmiRows.reduce((a,b)=>a+b,0)/bmiRows.length:0;
  const durations=rows.map(r=>parseFloat(r.surgery_duration_min)).filter(Boolean),avgDur=durations.length?durations.reduce((a,b)=>a+b,0)/durations.length:null;
  const rt=rows.filter(r=>String(r.procedure||'').toLowerCase().includes('rt')).length,lt=rows.filter(r=>String(r.procedure||'').toLowerCase().includes('lt')).length;
  strip.innerHTML=`<div class="vital"><div class="label">ทั้งหมด</div><div class="num">${rows.length}<span class="unit">เคส</span></div></div><div class="vital alt"><div class="label">TKA Rt.</div><div class="num">${rt}</div></div><div class="vital alt"><div class="label">TKA Lt.</div><div class="num">${lt}</div></div><div class="vital alt"><div class="label">Bilat TKA</div><div class="num">${rows.filter(r=>String(r.procedure||'').toLowerCase().includes('bilat')).length}</div></div><div class="vital"><div class="label">BMI เฉลี่ย</div><div class="num">${avg?avg.toFixed(1):'—'}</div></div><div class="vital"><div class="label">เวลาผ่าตัดเฉลี่ย</div><div class="num" style="font-size:20px;">${formatDuration(avgDur)}</div></div>`;
@@ -1430,24 +1523,50 @@ async function openForm(recordId){
  const {data:images}=await sb.from('record_images').select('*').eq('record_id',recordId).order('created_at');renderExistingImages(images||[]);}
 }
 
+async function backupToGoogleSheets(kind, table, record){
+  try{
+    const res=await fetch(GOOGLE_DRIVE_BACKUP_URL+'?key='+encodeURIComponent(GOOGLE_DRIVE_BACKUP_SECRET),{
+      method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({kind,table,record})
+    });
+    const j=await res.json();
+    if(!res.ok || j.ok===false) throw new Error(j.error||('HTTP '+res.status));
+    return j;
+  }catch(e){
+    console.warn('Google Sheets backup failed',e);
+    showToast('บันทึก Firebase แล้ว แต่สำรอง Google Sheets ไม่สำเร็จ',true);
+    return null;
+  }
+}
+
 async function saveRecord(e){
  e.preventDefault();const btn=document.getElementById('rf-save-btn');btn.disabled=true;btn.textContent='กำลังบันทึก…';
  try{
-  const payload={};FORM_FIELDS.forEach(f=>{const el=document.getElementById('rf-'+f);if(el)payload[f]=el.value===''?null:el.value});if(!payload.hn)throw new Error('กรุณากรอก HN');payload.full_name=getPatientFullName(payload);
-  if(payload.weight_kg && payload.height_cm){
-    payload.bmi = (parseFloat(payload.weight_kg) / Math.pow(parseFloat(payload.height_cm)/100, 2)).toFixed(2);
-  }
-  if(payload.tq_start && payload.tq_end){ payload.tq_duration_min = timeDiffMinutes(payload.tq_start, payload.tq_end); }
-  if(payload.surgery_start && payload.surgery_end){ payload.surgery_duration_min = timeDiffMinutes(payload.surgery_start, payload.surgery_end); }
-
+  const payload={};FORM_FIELDS.forEach(f=>{const el=document.getElementById('rf-'+f);if(el)payload[f]=el.value===''?null:el.value});
+  if(!payload.hn)throw new Error('กรุณากรอก HN');
+  payload.full_name=getPatientFullName(payload);
+  // Persist calculated values, not only the disabled preview fields.
+  const w=Number(payload.weight_kg), h=Number(payload.height_cm);
+  payload.bmi=(w>0 && h>0) ? Number((w/Math.pow(h/100,2)).toFixed(2)) : null;
+  payload.tq_duration_min=timeDiffMinutes(payload.tq_start,payload.tq_end);
+  payload.surgery_duration_min=timeDiffMinutes(payload.surgery_start,payload.surgery_end);
+  const wasEditing=!!editingId;
   let recordId=editingId;
-  if(editingId){payload.updated_by=currentUser.id;const {error}=await sb.from('records').update(payload).eq('id',editingId);if(error)throw error}
-  else{payload.created_by=currentUser.id;const {data,error}=await sb.from('records').insert(payload).select('id').single();if(error)throw error;recordId=data.id}
+  if(wasEditing){
+    payload.updated_by=currentUser.id;payload.updated_at=new Date().toISOString();
+    const {error}=await sb.from('records').update(payload).eq('id',editingId);if(error)throw error;
+  }else{
+    payload.created_by=currentUser.id;payload.created_at=new Date().toISOString();
+    const {data,error}=await sb.from('records').insert(payload).select('id').single();if(error)throw error;recordId=data.id;
+  }
+  await backupToGoogleSheets(wasEditing?'record_update':'record_create','records',{...payload,id:recordId});
   for(const item of pendingNewImages){
-   const path='drive:'+crypto.randomUUID();
-   const up=await sb.storage.from('tka-images').upload(path,item.file);if(up.error)throw up.error;
-   const driveId=up.data.path.replace(/^drive:/,'');
-   const {error}=await sb.from('record_images').insert({record_id:recordId,file_path:'drive:'+driveId,image_type:item.type,description:item.description||null,uploaded_by:currentUser.id,drive_file_id:driveId,created_at:new Date().toISOString()});if(error)throw error;
+    const path='drive:'+crypto.randomUUID();
+    const up=await sb.storage.from('tka-images').upload(path,item.file);if(up.error)throw up.error;
+    const driveId=up.data.path.replace(/^drive:/,'');
+    const imageRecord={id:crypto.randomUUID(),record_id:recordId,file_path:'drive:'+driveId,image_type:item.type,description:item.description||null,uploaded_by:currentUser.id,drive_file_id:driveId,file_name:item.file.name,mime_type:item.file.type||'image/jpeg',created_at:new Date().toISOString()};
+    const {error}=await sb.from('record_images').insert(imageRecord);if(error)throw error;
+    await backupToGoogleSheets('image_create','record_images',imageRecord);
   }
   showToast('บันทึกข้อมูลเรียบร้อย');pendingNewImages=[];viewDetail(recordId);
  }catch(err){showToast('บันทึกไม่สำเร็จ: '+err.message,true)}finally{btn.disabled=false;btn.textContent='💾 บันทึก'}return false;
@@ -1456,6 +1575,7 @@ async function saveRecord(e){
 async function viewDetail(id){
  showView('detail');document.getElementById('detail-body').innerHTML='<div class="loading"><span class="spinner"></span> กำลังโหลดข้อมูล…</div>';document.getElementById('detail-gallery').innerHTML='';
  const {data:rec,error}=await sb.from('records').select('*').eq('id',id).single();if(error){document.getElementById('detail-body').innerHTML='<div class="empty-note">'+escapeHtml(error.message)+'</div>';return}
+ window.currentPatientRecord = rec; // ใช้โดยปุ่ม "พิมพ์" — ก่อนหน้านี้ไม่เคยถูกตั้งค่า ทำให้พิมพ์ออกมาว่างเปล่าเสมอ
  document.getElementById('detail-title').textContent=getPatientFullName(rec);document.getElementById('detail-sub').textContent=`HN ${rec.hn} · ${rec.procedure||'-'} · ${formatDate(rec.surgery_date)}`;
  renderPatientDetailGrouped(rec);document.getElementById('detail-edit-btn').onclick=()=>openForm(id);document.getElementById('detail-delete-btn').onclick=()=>deleteRecord(id);applyRoleUI();
  const {data:images}=await sb.from('record_images').select('*').eq('record_id',id).order('created_at');const gallery=document.getElementById('detail-gallery');if(!images?.length){gallery.innerHTML='<div class="empty-note">ยังไม่มีรูปภาพ</div>';return}
@@ -1470,35 +1590,139 @@ async function deleteRecord(id){
  showToast('ลบข้อมูลแล้ว');showView('list');
 }
 
-async function loadSignedThumbnail(path){const {data}=await sb.storage.from('tka-images').createSignedUrl(path,3600);if(data)document.querySelectorAll(`img[data-path="${cssEscape(path)}"]`).forEach(img=>img.src=data.signedUrl)}
-
-async function loadUsers(){
- const tbody=document.getElementById('users-tbody');tbody.innerHTML='<tr><td colspan="4"><div class="loading"><span class="spinner"></span> กำลังโหลด…</div></td></tr>';
- const {data,error}=await sb.from('profiles').select('*').order('created_at',{ascending:false});if(error){tbody.innerHTML='<tr><td colspan="4"><div class="empty-note">'+escapeHtml(error.message)+'</div></td></tr>';return}
- tbody.innerHTML=(data||[]).map(u=>`<tr><td>${escapeHtml(u.full_name||'-')}</td><td class="mono" style="font-size:11px;color:var(--ink-faint);">${escapeHtml(u.id)}</td><td>${formatDate((u.created_at||'').slice(0,10))}</td><td><select onchange="updateUserRole('${u.id}',this.value)" ${u.id===currentUser.id?'disabled':''}><option value="viewer" ${u.role==='viewer'?'selected':''}>viewer</option><option value="staff" ${u.role==='staff'?'selected':''}>staff</option><option value="admin" ${u.role==='admin'?'selected':''}>admin</option></select></td></tr>`).join('');
+async function loadSignedThumbnail(path){
+  try{
+    const id=String(path).replace(/^drive:/,'');
+    const url=GOOGLE_DRIVE_BACKUP_URL+'?key='+encodeURIComponent(GOOGLE_DRIVE_BACKUP_SECRET)+'&kind=image&file_id='+encodeURIComponent(id)+'&thumb=1';
+    const resp=await fetch(url);
+    if(!resp.ok) throw new Error('โหลดรูป HTTP '+resp.status);
+    const j=await resp.json();
+    if(!j.ok || !j.base64) throw new Error(j.error||'ไม่พบข้อมูลรูป');
+    const src='data:'+(j.mime_type||'image/jpeg')+';base64,'+j.base64;
+    document.querySelectorAll(`img[data-path="${cssEscape(path)}"]`).forEach(img=>img.src=src);
+  }catch(e){
+    console.warn('loadSignedThumbnail:',e);
+    document.querySelectorAll(`img[data-path="${cssEscape(path)}"]`).forEach(img=>img.alt='โหลดรูปไม่สำเร็จ');
+  }
 }
 
-async function updateUserRole(userId,role){const {error}=await sb.from('profiles').update({role}).eq('id',userId);if(error){showToast('เปลี่ยนสิทธิ์ไม่สำเร็จ: '+error.message,true);return}showToast('เปลี่ยนสิทธิ์แล้ว');if(userId===currentUser.id){currentProfile.role=role;applyRoleUI()}}
+async function loadUsers(){
+ const tbody=document.getElementById('users-tbody');
+ tbody.innerHTML='<tr><td colspan="6"><div class="loading"><span class="spinner"></span> กำลังโหลด…</div></td></tr>';
+ const {data,error}=await sb.from('profiles').select('*').order('created_at',{ascending:false});
+ if(error){tbody.innerHTML='<tr><td colspan="6"><div class="empty-note">'+escapeHtml(error.message)+'</div></td></tr>';return}
+ tbody.innerHTML=(data||[]).map(u=>{
+   const uid=String(u.id||'');
+   const username=String(u.username||'');
+   const email=String(u.email||'');
+   const safeUid=escapeHtml(uid), safeUsername=escapeHtml(username), safeEmail=escapeHtml(email);
+   const self=uid===currentUser.id;
+   return `<tr>
+     <td>${escapeHtml(u.full_name||'-')}</td>
+     <td class="mono">${safeUsername||'-'}</td>
+     <td>${safeEmail||'-'}</td>
+     <td>${formatDate((u.created_at||'').slice(0,10))}</td>
+     <td><select onchange="updateUserRole('${safeUid}',this.value)" ${self?'disabled':''}>
+       <option value="viewer" ${u.role==='viewer'?'selected':''}>viewer</option>
+       <option value="staff" ${u.role==='staff'?'selected':''}>staff</option>
+       <option value="admin" ${u.role==='admin'?'selected':''}>admin</option>
+     </select></td>
+     <td style="white-space:nowrap;">
+       <button class="btn btn-sm" onclick="showUserAccount(${JSON.stringify(uid)})">ดูรายละเอียด</button>
+       <button class="btn btn-sm" onclick="sendUserPasswordReset(${JSON.stringify(uid)})">รีเซ็ตรหัสผ่าน</button>
+       <button class="btn btn-sm btn-danger" onclick="deleteUserAccount(${JSON.stringify(uid)})" ${self?'disabled':''}>ลบ User</button>
+     </td>
+   </tr>`;
+ }).join('');
+}
 
-async function syncAllToGoogleSheets(){
-  const btn = document.getElementById('sync-google-btn');
-  btn.disabled = true; btn.textContent = '⏳ กำลังสำรองข้อมูล…';
-  try {
-    const { data: records, error } = await sb.from('records').select('*');
-    if(error) throw error;
-    const resp = await fetch(GOOGLE_DRIVE_BACKUP_URL + '?key=' + encodeURIComponent(GOOGLE_DRIVE_BACKUP_SECRET), {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ kind: 'sheets_backup', records: records || [] })
-    });
-    const res = await resp.json();
-    if(res.ok) showToast(`สำรองข้อมูลเรียบร้อย (${records.length} เคส)`);
-    else throw new Error(res.error || 'สำรองข้อมูลไม่สำเร็จ');
-  } catch(e) {
-    showToast('การสำรองข้อมูลล้มเหลว: ' + e.message, true);
-  } finally {
-    btn.disabled = false; btn.textContent = '☁ สำรองไป Google Sheets';
-  }
+async function showUserAccount(userId){
+ const {data,error}=await sb.from('profiles').select('*').eq('id',userId).maybeSingle();
+ if(error||!data){showToast('ไม่พบข้อมูลผู้ใช้',true);return;}
+ alert(
+   `รายละเอียดบัญชี\n\n`+
+   `ชื่อ: ${data.full_name||'-'}\n`+
+   `Username: ${data.username||'-'}\n`+
+   `Email: ${data.email||'-'}\n`+
+   `Role: ${data.role||'-'}\n\n`+
+   `รหัสผ่านเดิมจะไม่แสดงในระบบเพื่อความปลอดภัย\n`+
+   `ให้ใช้ปุ่ม “รีเซ็ตรหัสผ่าน” เพื่อเปลี่ยนรหัสผ่าน`
+ );
+}
+
+async function sendUserPasswordReset(userId){
+ const {data,error}=await sb.from('profiles').select('*').eq('id',userId).maybeSingle();
+ if(error||!data){showToast('ไม่พบข้อมูลผู้ใช้',true);return;}
+ const email=String(data.email||'').trim();
+ if(!email || !email.includes('@')){showToast('บัญชีนี้ยังไม่มี Email สำหรับรีเซ็ตรหัสผ่าน',true);return;}
+ const ok=confirm(`ส่งลิงก์รีเซ็ตรหัสผ่านไปที่\n${email}\n\nยืนยันหรือไม่?`);
+ if(!ok)return;
+ try{
+   await firebase.sendPasswordResetEmail(firebase.auth,email);
+   showToast('ส่งลิงก์รีเซ็ตรหัสผ่านแล้ว');
+ }catch(e){
+   showToast('รีเซ็ตรหัสผ่านไม่สำเร็จ: '+(e.message||e),true);
+ }
+}
+
+async function callAdminBackend(action,payload={}){
+ if(!currentUser?.user) throw new Error('กรุณาเข้าสู่ระบบใหม่');
+ const role=String(currentProfile?.role||'').trim().toLowerCase();
+ if(role!=='admin') throw new Error('Admin access required');
+ const idToken=await currentUser.user.getIdToken(true);
+ const response=await fetch(ADMIN_BACKEND_URL+'/admin/'+action,{
+   method:'POST',
+   headers:{
+     'Content-Type':'application/json',
+     'Authorization':'Bearer '+idToken
+   },
+   body:JSON.stringify(payload)
+ });
+ let result={};
+ try{result=await response.json();}catch(_){result={};}
+ if(!response.ok || result.ok===false){
+   throw new Error(result.error||('Cloud Run HTTP '+response.status));
+ }
+ return result;
+}
+
+async function deleteUserAccount(userId){
+ if(!userId){showToast('ไม่พบ UID ของผู้ใช้',true);return;}
+ if(userId===currentUser.id){showToast('ไม่อนุญาตให้ Admin ลบบัญชีของตัวเอง',true);return;}
+ const {data:user,error}=await sb.from('profiles').select('*').eq('id',userId).maybeSingle();
+ if(error||!user){showToast('ไม่พบข้อมูลผู้ใช้',true);return;}
+ const display=user.username||user.email||userId;
+ const ok=confirm(
+   `ต้องการลบบัญชี ${display} แบบถาวรหรือไม่?\n\n`+
+   `Cloud Run จะลบ Firebase Authentication และข้อมูล Profile ที่เกี่ยวข้อง\n`+
+   `การลบนี้ไม่สามารถย้อนกลับได้`
+ );
+ if(!ok)return;
+ try{
+   showToast('กำลังลบบัญชี...');
+   await callAdminBackend('delete-user',{
+     uid:userId,
+     email:user.email||'',
+     username:user.username||''
+   });
+   showToast('ลบบัญชี Authentication + Profile เรียบร้อยแล้ว');
+   await loadUsers();
+ }catch(e){
+   console.error('DELETE USER ERROR:',e);
+   showToast('ลบบัญชีไม่สำเร็จ: '+(e.message||e),true);
+ }
+}
+
+async function updateUserRole(userId,role){
+ const {error}=await sb.from('profiles').update({role}).eq('id',userId);
+ if(error){showToast('เปลี่ยนสิทธิ์ไม่สำเร็จ: '+error.message,true);return}
+ showToast('เปลี่ยนสิทธิ์แล้ว');
+ if(userId===currentUser.id){currentProfile.role=role;applyRoleUI()}
+}
+
+async function syncPostToGoogle(payload){
+ const res=await fetch(GOOGLE_DRIVE_BACKUP_URL+'?key='+encodeURIComponent(GOOGLE_DRIVE_BACKUP_SECRET),{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+ if(!res.ok)throw new Error('Google Apps Script HTTP '+res.status);return res;
 }
 
 async function claimAdmin(){
@@ -1512,17 +1736,94 @@ async function claimAdmin(){
 
 async function deleteExistingImage(imageId,filePath){
  if(!confirm('ลบรูปนี้ใช่หรือไม่?'))return;
- try{
-  const {error}=await sb.from('record_images').delete().eq('id',imageId);
-  if(error) throw error;
-  showToast('ลบรูปภาพแล้ว');
-  const card = document.querySelector(`.image-card[data-image-id="${imageId}"]`);
-  if(card) card.remove();
-  if(editingId) openForm(editingId);
- }catch(e){
-  showToast('ลบรูปไม่สำเร็จ: ' + e.message, true);
- }
+ const {data:imageBefore}=await sb.from('record_images').select('*').eq('id',imageId).maybeSingle();
+ const {error}=await sb.from('record_images').delete().eq('id',imageId);if(error){showToast('ลบรูปไม่สำเร็จ: '+error.message,true);return}
+ if(imageBefore)syncPostToGoogle({kind:'image_delete',record:{id:imageBefore.id}}).catch(()=>{});
+ document.querySelector(`[data-image-id="${imageId}"]`)?.remove();showToast('ลบรูปแล้ว');
 }
+
+async function openLightboxByPath(path){
+ try{
+  const id=String(path).replace(/^drive:/,'');
+  const url=GOOGLE_DRIVE_BACKUP_URL+'?key='+encodeURIComponent(GOOGLE_DRIVE_BACKUP_SECRET)+'&kind=image&file_id='+encodeURIComponent(id);
+  const resp=await fetch(url);
+  if(!resp.ok) throw new Error('โหลดรูป HTTP '+resp.status);
+  const j=await resp.json();
+  if(!j.ok || !j.base64) throw new Error(j.error||'ไม่พบข้อมูลรูป');
+  document.getElementById('lightbox-img').src='data:'+(j.mime_type||'image/jpeg')+';base64,'+j.base64;
+  document.getElementById('lightbox').style.display='flex';
+ }catch(e){showToast('เปิดรูปไม่สำเร็จ: '+e.message,true)}
+}
+
+async function syncAllToGoogleSheets(){
+ if(!currentUser){showToast('กรุณา Login ก่อน',true);return} if(currentProfile?.role!=='admin'){showToast('เฉพาะ Admin เท่านั้น',true);return}
+ if(!confirm('สำรองข้อมูลที่มีอยู่ทั้งหมดไป Google Sheets ตอนนี้ใช่หรือไม่?'))return;
+ const btn=document.getElementById('sync-google-btn');if(btn){btn.disabled=true;btn.textContent='☁ กำลังสำรอง…'}
+ try{
+  let total=0;for(const table of ['records','profiles','record_images']){const {data,error}=await sb.from(table).select('*').limit(10000);if(error)throw new Error(table+': '+error.message);for(const row of data||[]){await syncPostToGoogle({type:'INSERT',table,schema:'firebase',record:row,old_record:null});total++}}
+  showToast(`สำรองข้อมูลแล้ว ${total} รายการ`);
+ }catch(e){showToast('สำรองไม่สำเร็จ: '+e.message,true)}finally{if(btn){btn.disabled=false;btn.textContent='☁ สำรองไป Google Sheets'}}
+}
+
+function escPrint(v){
+  return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function printPatientReport(record){
+  const r=record||{};
+  if(!r.hn){ showToast('ไม่พบข้อมูลผู้ป่วยสำหรับพิมพ์ — กรุณาเปิดหน้ารายละเอียดผู้ป่วยก่อน', true); return; }
+  const dur=v=>formatDuration(v);
+  const full=getPatientFullName(r);
+  const section=(title,pairs)=>`
+    <h2>${escPrint(title)}</h2>
+    <div class="grid">${pairs.map(([label,val])=>`<div class="cell"><span class="label">${escPrint(label)}</span><span class="value">${escPrint(val==null||val===''?'-':val)}</span></div>`).join('')}</div>`;
+  const html = `
+    <div class="report-header">
+      <h1>TKA Registry — Patient Report</h1>
+      <div>รายงานข้อมูลผู้ป่วยเปลี่ยนข้อเข่า</div>
+    </div>
+    <div class="meta">
+      <div><b>HN:</b> ${escPrint(r.hn)}</div>
+      <div><b>ชื่อ-สกุล:</b> ${escPrint(full)}</div>
+      <div><b>Procedure:</b> ${escPrint(r.procedure||'-')}</div>
+      <div><b>วันที่ผ่าตัด:</b> ${escPrint(formatDate(r.surgery_date))}</div>
+    </div>
+    ${section('ข้อมูลผู้ป่วย',[
+      ['เพศ',r.gender],['อายุ',r.age?`${r.age} ปี`:'-'],
+      ['น้ำหนัก',r.weight_kg?`${r.weight_kg} กก.`:'-'],['ส่วนสูง',r.height_cm?`${r.height_cm} ซม.`:'-'],
+      ['BMI',r.bmi==null||r.bmi===''?'-':Number(r.bmi).toFixed(1)]
+    ])}
+    ${section('ผลตรวจทางห้องปฏิบัติการ',[
+      ['Hct',r.hct],['Hb',r.hb],['eGFR',r.egfr],['Cr',r.cr],['Alb',r.alb],['HbA1C',r.hba1c]
+    ])}
+    ${section('Tourniquet & มุมข้อเข่า',[
+      ['TQ (mmHg)',r.tq_mmhg],['TQ Start',r.tq_start],['TQ End',r.tq_end],['TQ Duration',dur(r.tq_duration_min)],
+      ['Extension lag (°)',r.extension_lag_deg],['Varus (°)',r.varus_deg],['Valgus (°)',r.valgus_deg]
+    ])}
+    ${section('เวลาผ่าตัด',[
+      ['เวลาเริ่มผ่าตัด',r.surgery_start],['เวลาเสร็จผ่าตัด',r.surgery_end],['ระยะเวลาผ่าตัด',dur(r.surgery_duration_min)],
+      ['Debridement time (นาที)',r.debridement_time_min],['Suture time (นาที)',r.suture_time_min]
+    ])}
+    ${section('Pulse (ก่อนผ่าตัด)',[
+      ['Manual DP',r.pre_manual_dp],['Manual TP',r.pre_manual_tp],['Digital DP',r.pre_digital_dp],['Digital TP',r.pre_digital_tp]
+    ])}
+    ${section('Pulse (หลังผ่าตัด)',[
+      ['Manual DP',r.post_manual_dp],['Manual TP',r.post_manual_tp],['Digital DP',r.post_digital_dp],['Digital TP',r.post_digital_tp]
+    ])}
+    <div class="footer">พิมพ์เมื่อ: ${escPrint(new Date().toLocaleString('th-TH'))}${currentUser?.email?' · โดย '+escPrint(currentUser.email):''}</div>
+  `;
+  document.getElementById('print-report').innerHTML = html;
+  window.print();
+}
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden){
+    try{
+      const last = localStorage.getItem('tka_last_view');
+      if(last && ['list','form','detail'].includes(last) && currentUser) showView(last);
+    }catch(e){}
+  }
+});
 </script>
+
+<div id="print-report" aria-hidden="true"></div>
 </body>
 </html>
