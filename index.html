@@ -297,7 +297,37 @@ tbody tr:last-child td{border-bottom:none;}
 
 
 @media print{
-  #app-shell{display:none !important;}
+  @page{size:A4 portrait;margin:8mm 8mm 9mm 8mm}
+  html,body{width:210mm;min-height:297mm;background:#fff !important;color:#111 !important}
+  body{font-family:Arial,"Noto Sans Thai",sans-serif;font-size:8.5pt;line-height:1.2}
+  #app-shell{display:block !important}
+  #app-shell > .topbar,#config-warning,main > .view > .page-head .btn,.no-print,#bottom-nav,
+  #view-list,#view-form,#view-users,#toast,#lightbox{display:none !important}
+  #view-detail{display:block !important;margin:0 !important;padding:0 !important}
+  #view-detail .page-head{display:block !important;margin:0 0 5mm !important;padding:0 0 2mm !important;border-bottom:1px solid #222}
+  #detail-title{font-size:17pt !important;margin:0 !important;line-height:1.1}
+  #detail-sub{font-size:8.5pt !important;margin:1mm 0 0 !important;color:#444 !important}
+  #view-detail .card{box-shadow:none !important;border:0 !important;border-radius:0 !important;padding:0 !important;margin:0 !important}
+  #detail-body{font-size:8pt !important}
+  #detail-body .detail-grid{display:grid !important;grid-template-columns:repeat(4,minmax(0,1fr)) !important;gap:1.5mm !important}
+  #detail-body .detail-item{padding:1.4mm 1.8mm !important;border:0.25mm solid #ddd !important;border-radius:1.2mm !important;background:#fafafa !important;min-height:8.5mm !important;break-inside:avoid}
+  #detail-body .detail-item .k{display:block !important;font-size:6.5pt !important;color:#666 !important;margin-bottom:.6mm !important}
+  #detail-body .detail-item .v{display:block !important;font-size:8pt !important;font-weight:600 !important;white-space:normal !important}
+  #detail-gallery-card{display:block !important;margin-top:3mm !important}
+  #detail-gallery-card h3{font-size:9pt !important;margin:0 0 1.5mm !important}
+  #detail-gallery{display:grid !important;grid-template-columns:repeat(4,1fr) !important;gap:2mm !important}
+  #detail-gallery > div{break-inside:avoid;text-align:center}
+  #detail-gallery img{width:100% !important;height:25mm !important;object-fit:cover !important;border-radius:1mm !important}
+  #detail-gallery .gcap{font-size:6.5pt !important;color:#555 !important;margin-top:.5mm !important}
+  #print-footer{display:block !important;margin-top:2.5mm !important;padding-top:1.5mm;border-top:.25mm solid #bbb;font-size:6.5pt;color:#666;text-align:right}
+}
+#print-footer{display:none}
+
+@media print{
+  #app-shell > .topbar, #config-warning, main > .view > .page-head .btn, .no-print, #bottom-nav{display:none !important;}
+  main{max-width:100%; padding:0;}
+  body{background:#fff;}
+  .card{box-shadow:none; border:none;}
 }
 
 /* ---------- role status banners ---------- */
@@ -412,30 +442,73 @@ tbody tr:last-child td{border-bottom:none;}
 
 /* ===== A4 one-page patient report ===== */
 @media print{
-  @page{size:A4 portrait;margin:9mm}
+  @page{size:A4 portrait;margin:10mm}
   body{background:#fff!important}
   body *{visibility:hidden!important}
-  #print-report,#print-report *{visibility:visible!important}
+  #print-report,#print-report *{
+    visibility:visible!important;
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+    color-adjust:exact!important;
+  }
   #print-report{
     display:block!important;
     position:absolute!important;
     left:0!important;top:0!important;
-    width:192mm!important;
+    width:190mm!important;
+    min-height:277mm!important;
     background:#fff!important;
-    color:#111!important;
+    color:#152524!important;
     font-family:Arial,"Noto Sans Thai",sans-serif!important;
-    font-size:8.3pt!important;
-    line-height:1.2!important;
+    font-size:9.5pt!important;
+    line-height:1.25!important;
   }
-  #print-report .report-header{border-bottom:1.5px solid #111;padding-bottom:2mm;margin-bottom:2mm}
-  #print-report h1{font-size:14pt!important;margin:0 0 1mm!important}
-  #print-report h2{font-size:9pt!important;margin:2mm 0 1mm!important;border-bottom:1px solid #bbb;padding-bottom:.6mm}
-  #print-report .meta{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5mm;margin-bottom:1.5mm;font-size:8.5pt}
-  #print-report .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1mm 3mm}
-  #print-report .cell{display:flex;gap:1.5mm}
-  #print-report .label{font-weight:700;min-width:24mm}
-  #print-report .value{word-break:break-word}
-  #print-report .footer{margin-top:3mm;font-size:7pt;color:#444}
+  /* full-bleed brand color bar at the very top of the page */
+  #print-report .report-header{
+    position:relative;
+    border-bottom:2px solid #0F4C4A;
+    padding:0 0 3mm;
+    margin-bottom:3mm;
+  }
+  #print-report .report-header::before{
+    content:"";
+    display:block;
+    height:3mm;
+    margin:-10mm -10mm 3mm;
+    background:linear-gradient(90deg,#0F4C4A,#17716C 55%,#BE8A34);
+  }
+  #print-report h1{font-size:16pt!important;margin:0 0 1mm!important;color:#0F4C4A!important}
+  #print-report .report-header > div{color:#54655F;font-size:9pt}
+  #print-report .meta{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:2mm;
+    margin-bottom:3mm;padding:2.5mm 4mm;
+    background:#DCEFEA;border:1px solid #0F4C4A;border-radius:2mm;
+  }
+  #print-report .meta div{font-size:10pt}
+  #print-report .meta b{color:#0F4C4A}
+  #print-report .p-section{
+    margin-bottom:3mm;border:1px solid #BE8A34;border-radius:2mm;
+    overflow:hidden;break-inside:avoid;
+  }
+  #print-report .p-section-title{
+    background:#0F4C4A;color:#fff;font-weight:700;font-size:9.5pt;
+    padding:1.5mm 3mm;letter-spacing:.02em;
+  }
+  #print-report .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0;background:#DEE6E3}
+  #print-report .cell{
+    display:flex;gap:2mm;background:#fff;padding:1.5mm 3mm;
+    border-top:1px solid #EAEFED;
+  }
+  #print-report .cell:nth-child(odd){border-right:1px solid #EAEFED}
+  #print-report .label{font-weight:700;min-width:32mm;color:#54655F}
+  #print-report .value{word-break:break-word;color:#152524}
+  #print-report table{width:100%;border-collapse:collapse;font-size:8.5pt}
+  #print-report th,#print-report td{border:1px solid #BE8A34;padding:1.2mm;vertical-align:top}
+  #print-report th{background:#F3E6C8}
+  #print-report .footer{
+    margin-top:4mm;font-size:8pt;color:#8A9793;
+    border-top:1px solid #DEE6E3;padding-top:2mm;
+  }
 }
 #print-report{display:none}
 
@@ -1326,49 +1399,14 @@ function cssEscape(s){ return String(s).replace(/["\\]/g,'\\$&'); }
 
 
 
-async function compressImageFile(file, maxDim=1600, quality=0.75){
-  // เก็บไฟล์ที่ไม่ใช่รูปแบบภาพทั่วไป (เช่น svg) ไว้แบบเดิม ไม่บีบอัด
-  if(!file.type || !file.type.startsWith('image/') || file.type === 'image/svg+xml') return file;
-  try{
-    const bitmap = await createImageBitmap(file);
-    let { width, height } = bitmap;
-    if(width > maxDim || height > maxDim){
-      const scale = maxDim / Math.max(width, height);
-      width = Math.round(width * scale);
-      height = Math.round(height * scale);
-    }
-    const canvas = document.createElement('canvas');
-    canvas.width = width; canvas.height = height;
-    canvas.getContext('2d').drawImage(bitmap, 0, 0, width, height);
-    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
-    if(!blob || blob.size >= file.size) return file; // ถ้าบีบแล้วไม่ได้เล็กลง ใช้ไฟล์เดิม
-    const newName = file.name.replace(/\.\w+$/, '') + '.jpg';
-    return new File([blob], newName, { type: 'image/jpeg' });
-  }catch(e){
-    console.warn('บีบอัดรูปไม่สำเร็จ ใช้ไฟล์ต้นฉบับแทน:', e);
-    return file;
-  }
-}
-
-async function handleFileSelect(e){
+function handleFileSelect(e){
   const files = Array.from(e.target.files || []);
-  e.target.value = '';
-  if(!files.length) return;
-  let originalTotal = 0, compressedTotal = 0;
-  for(const original of files){
-    originalTotal += original.size;
-    const file = await compressImageFile(original);
-    compressedTotal += file.size;
+  files.forEach(file => {
     const previewUrl = URL.createObjectURL(file);
     pendingNewImages.push({ file, previewUrl, type: 'Pre-op', description: '' });
-  }
+  });
+  e.target.value = '';
   renderNewImages();
-  if(originalTotal > 0){
-    const savedPct = Math.round((1 - compressedTotal / originalTotal) * 100);
-    if(savedPct > 5){
-      showToast(`บีบอัดรูปภาพแล้ว ลดขนาดลง ${savedPct}% (${(originalTotal/1024/1024).toFixed(1)}MB → ${(compressedTotal/1024/1024).toFixed(1)}MB)`);
-    }
-  }
 }
 
 
@@ -1575,7 +1613,6 @@ async function saveRecord(e){
 async function viewDetail(id){
  showView('detail');document.getElementById('detail-body').innerHTML='<div class="loading"><span class="spinner"></span> กำลังโหลดข้อมูล…</div>';document.getElementById('detail-gallery').innerHTML='';
  const {data:rec,error}=await sb.from('records').select('*').eq('id',id).single();if(error){document.getElementById('detail-body').innerHTML='<div class="empty-note">'+escapeHtml(error.message)+'</div>';return}
- window.currentPatientRecord = rec; // ใช้โดยปุ่ม "พิมพ์" — ก่อนหน้านี้ไม่เคยถูกตั้งค่า ทำให้พิมพ์ออกมาว่างเปล่าเสมอ
  document.getElementById('detail-title').textContent=getPatientFullName(rec);document.getElementById('detail-sub').textContent=`HN ${rec.hn} · ${rec.procedure||'-'} · ${formatDate(rec.surgery_date)}`;
  renderPatientDetailGrouped(rec);document.getElementById('detail-edit-btn').onclick=()=>openForm(id);document.getElementById('detail-delete-btn').onclick=()=>deleteRecord(id);applyRoleUI();
  const {data:images}=await sb.from('record_images').select('*').eq('record_id',id).order('created_at');const gallery=document.getElementById('detail-gallery');if(!images?.length){gallery.innerHTML='<div class="empty-note">ยังไม่มีรูปภาพ</div>';return}
@@ -1584,8 +1621,6 @@ async function viewDetail(id){
 
 async function deleteRecord(id){
  if(!confirm('ยืนยันการลบข้อมูลผู้ป่วยรายนี้? การลบไม่สามารถย้อนกลับได้'))return;
- const {data:images}=await sb.from('record_images').select('*').eq('record_id',id);
- for(const img of (images||[])){ await sb.from('record_images').delete().eq('id',img.id); }
  const {error}=await sb.from('records').delete().eq('id',id);if(error){showToast('ลบไม่สำเร็จ: '+error.message,true);return}
  showToast('ลบข้อมูลแล้ว');showView('list');
 }
@@ -1622,15 +1657,15 @@ async function loadUsers(){
      <td class="mono">${safeUsername||'-'}</td>
      <td>${safeEmail||'-'}</td>
      <td>${formatDate((u.created_at||'').slice(0,10))}</td>
-     <td><select onchange="updateUserRole('${safeUid}',this.value)" ${self?'disabled':''}>
+     <td><select data-prev="${u.role==='admin'||u.role==='staff'?u.role:'viewer'}" onchange="updateUserRole('${safeUid}',this)" ${self?'disabled':''}>
        <option value="viewer" ${u.role==='viewer'?'selected':''}>viewer</option>
        <option value="staff" ${u.role==='staff'?'selected':''}>staff</option>
        <option value="admin" ${u.role==='admin'?'selected':''}>admin</option>
      </select></td>
      <td style="white-space:nowrap;">
-       <button class="btn btn-sm" onclick="showUserAccount(${JSON.stringify(uid)})">ดูรายละเอียด</button>
-       <button class="btn btn-sm" onclick="sendUserPasswordReset(${JSON.stringify(uid)})">รีเซ็ตรหัสผ่าน</button>
-       <button class="btn btn-sm btn-danger" onclick="deleteUserAccount(${JSON.stringify(uid)})" ${self?'disabled':''}>ลบ User</button>
+       <button class="btn btn-sm" onclick="showUserAccount('${safeUid}')">ดูรายละเอียด</button>
+       <button class="btn btn-sm" onclick="sendUserPasswordReset('${safeUid}')">รีเซ็ตรหัสผ่าน</button>
+       <button class="btn btn-sm btn-danger" onclick="deleteUserAccount('${safeUid}')" ${self?'disabled':''}>ลบ User</button>
      </td>
    </tr>`;
  }).join('');
@@ -1713,11 +1748,32 @@ async function deleteUserAccount(userId){
  }
 }
 
-async function updateUserRole(userId,role){
- const {error}=await sb.from('profiles').update({role}).eq('id',userId);
- if(error){showToast('เปลี่ยนสิทธิ์ไม่สำเร็จ: '+error.message,true);return}
- showToast('เปลี่ยนสิทธิ์แล้ว');
- if(userId===currentUser.id){currentProfile.role=role;applyRoleUI()}
+async function updateUserRole(userId,selectEl){
+ const role=selectEl.value;
+ const prev=selectEl.dataset.prev||role;
+ selectEl.disabled=true;
+ try{
+   const {error}=await sb.from('profiles').update({role}).eq('id',userId);
+   if(error){
+     const denied=/permission|insufficient|denied/i.test(error.message||'');
+     showToast(
+       denied
+         ? 'เปลี่ยนสิทธิ์ไม่สำเร็จ: ไม่มีสิทธิ์แก้ไขบัญชีผู้อื่น — ตรวจสอบ Firestore Security Rules ของ collection "profiles" ว่าอนุญาตให้ผู้ใช้ role=admin เขียนเอกสารของผู้ใช้อื่นได้ (ไม่ใช่แค่เอกสารของตัวเอง)'
+         : 'เปลี่ยนสิทธิ์ไม่สำเร็จ: '+error.message,
+       true
+     );
+     selectEl.value=prev;
+     return;
+   }
+   selectEl.dataset.prev=role;
+   showToast('เปลี่ยนสิทธิ์แล้ว');
+   if(userId===currentUser.id){currentProfile.role=role;applyRoleUI()}
+ }catch(e){
+   showToast('เปลี่ยนสิทธิ์ไม่สำเร็จ: '+(e.message||e),true);
+   selectEl.value=prev;
+ }finally{
+   selectEl.disabled=(userId===currentUser.id);
+ }
 }
 
 async function syncPostToGoogle(payload){
@@ -1765,55 +1821,13 @@ async function syncAllToGoogleSheets(){
  }catch(e){showToast('สำรองไม่สำเร็จ: '+e.message,true)}finally{if(btn){btn.disabled=false;btn.textContent='☁ สำรองไป Google Sheets'}}
 }
 
-function escPrint(v){
-  return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function printPatientReport(record){
-  const r=record||{};
-  if(!r.hn){ showToast('ไม่พบข้อมูลผู้ป่วยสำหรับพิมพ์ — กรุณาเปิดหน้ารายละเอียดผู้ป่วยก่อน', true); return; }
-  const dur=v=>formatDuration(v);
-  const full=getPatientFullName(r);
-  const section=(title,pairs)=>`
-    <h2>${escPrint(title)}</h2>
-    <div class="grid">${pairs.map(([label,val])=>`<div class="cell"><span class="label">${escPrint(label)}</span><span class="value">${escPrint(val==null||val===''?'-':val)}</span></div>`).join('')}</div>`;
-  const html = `
-    <div class="report-header">
-      <h1>TKA Registry — Patient Report</h1>
-      <div>รายงานข้อมูลผู้ป่วยเปลี่ยนข้อเข่า</div>
-    </div>
-    <div class="meta">
-      <div><b>HN:</b> ${escPrint(r.hn)}</div>
-      <div><b>ชื่อ-สกุล:</b> ${escPrint(full)}</div>
-      <div><b>Procedure:</b> ${escPrint(r.procedure||'-')}</div>
-      <div><b>วันที่ผ่าตัด:</b> ${escPrint(formatDate(r.surgery_date))}</div>
-    </div>
-    ${section('ข้อมูลผู้ป่วย',[
-      ['เพศ',r.gender],['อายุ',r.age?`${r.age} ปี`:'-'],
-      ['น้ำหนัก',r.weight_kg?`${r.weight_kg} กก.`:'-'],['ส่วนสูง',r.height_cm?`${r.height_cm} ซม.`:'-'],
-      ['BMI',r.bmi==null||r.bmi===''?'-':Number(r.bmi).toFixed(1)]
-    ])}
-    ${section('ผลตรวจทางห้องปฏิบัติการ',[
-      ['Hct',r.hct],['Hb',r.hb],['eGFR',r.egfr],['Cr',r.cr],['Alb',r.alb],['HbA1C',r.hba1c]
-    ])}
-    ${section('Tourniquet & มุมข้อเข่า',[
-      ['TQ (mmHg)',r.tq_mmhg],['TQ Start',r.tq_start],['TQ End',r.tq_end],['TQ Duration',dur(r.tq_duration_min)],
-      ['Extension lag (°)',r.extension_lag_deg],['Varus (°)',r.varus_deg],['Valgus (°)',r.valgus_deg]
-    ])}
-    ${section('เวลาผ่าตัด',[
-      ['เวลาเริ่มผ่าตัด',r.surgery_start],['เวลาเสร็จผ่าตัด',r.surgery_end],['ระยะเวลาผ่าตัด',dur(r.surgery_duration_min)],
-      ['Debridement time (นาที)',r.debridement_time_min],['Suture time (นาที)',r.suture_time_min]
-    ])}
-    ${section('Pulse (ก่อนผ่าตัด)',[
-      ['Manual DP',r.pre_manual_dp],['Manual TP',r.pre_manual_tp],['Digital DP',r.pre_digital_dp],['Digital TP',r.pre_digital_tp]
-    ])}
-    ${section('Pulse (หลังผ่าตัด)',[
-      ['Manual DP',r.post_manual_dp],['Manual TP',r.post_manual_tp],['Digital DP',r.post_digital_dp],['Digital TP',r.post_digital_tp]
-    ])}
-    <div class="footer">พิมพ์เมื่อ: ${escPrint(new Date().toLocaleString('th-TH'))}${currentUser?.email?' · โดย '+escPrint(currentUser.email):''}</div>
-  `;
-  document.getElementById('print-report').innerHTML = html;
-  window.print();
-}
+</script>
+
+<div id="print-report" aria-hidden="true"></div>
+</body>
+</html>
+
+<script>
 document.addEventListener('visibilitychange', () => {
   if(!document.hidden){
     try{
@@ -1822,8 +1836,49 @@ document.addEventListener('visibilitychange', () => {
     }catch(e){}
   }
 });
-</script>
 
+function escPrint(v){
+  return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function printPatientReport(record){
+  const r=record||{};
+  const duration=v=>v==null||v===''?'-':formatDuration(Number(v));
+  const full=r.full_name || [r.name_prefix,r.first_name,r.last_name].filter(Boolean).join(' ') || '-';
+  const sections=[
+    {title:'ข้อมูลผู้ป่วย',cells:[
+      ['HN',r.hn],['ชื่อ-สกุล',full],['อายุ',r.age?`${r.age} ปี`:'-'],['เพศ',r.gender||'-'],
+      ['BMI',r.bmi==null||r.bmi===''?'-':Number(r.bmi).toFixed(1)],
+      ['Diagnosis',r.diagnosis||'-'],['Side',r.side||'-'],['Surgeon',r.surgeon||'-']
+    ]},
+    {title:'ระยะเวลาห้ามเลือด / ผ่าตัด',cells:[
+      ['TQ Start',r.tq_start||'-'],['TQ End',r.tq_end||'-'],['TQ Duration',duration(r.tq_duration_min)],
+      ['Surgery Start',r.surgery_start||'-'],['Surgery End',r.surgery_end||'-'],['Surgery Duration',duration(r.surgery_duration_min)]
+    ]},
+    {title:'ข้อมูลเพิ่มเติม',cells:[
+      ['Implant',r.implant||'-'],['Anesthesia',r.anesthesia||'-'],['Notes',r.notes||'-']
+    ]}
+  ];
+  const sectionsHtml=sections.map(sec=>`
+    <div class="p-section">
+      <div class="p-section-title">${escPrint(sec.title)}</div>
+      <div class="grid">${sec.cells.map(x=>`<div class="cell"><span class="label">${escPrint(x[0])}</span><span class="value">${escPrint(x[1])}</span></div>`).join('')}</div>
+    </div>`).join('');
+  const now=new Date().toLocaleString('th-TH');
+  document.getElementById('print-report').innerHTML = `
+    <div class="report-header">
+      <h1>TKA Registry — Patient Report</h1>
+      <div>รายงานข้อมูลผู้ป่วยสำหรับการบันทึก/พิมพ์</div>
+    </div>
+    <div class="meta">
+      <div><b>HN:</b> ${escPrint(r.hn)}</div>
+      <div><b>ชื่อ-สกุล:</b> ${escPrint(full)}</div>
+    </div>
+    ${sectionsHtml}
+    <div class="footer">พิมพ์เมื่อ: ${now}</div>
+  `;
+  window.print();
+}
+</script>
 <div id="print-report" aria-hidden="true"></div>
 </body>
 </html>
