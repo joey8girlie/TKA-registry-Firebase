@@ -285,6 +285,25 @@ tbody tr:last-child td{border-bottom:none;}
 #lightbox img{max-width:100%; max-height:100%; border-radius:8px;}
 #lightbox .lb-close{position:absolute; top:18px; right:22px; background:rgba(255,255,255,.12); border:none; color:#fff; width:38px; height:38px; border-radius:50%; font-size:18px; cursor:pointer;}
 
+/* ---------- note templates ---------- */
+.note-toolbar{display:flex; gap:8px; margin:2px 0 8px; flex-wrap:wrap;}
+.note-template-modal{display:none; position:fixed; inset:0; background:rgba(10,20,18,.55); z-index:210; align-items:center; justify-content:center; padding:20px;}
+.note-template-modal.open{display:flex;}
+.note-template-card{background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); width:100%; max-width:520px; max-height:82vh; display:flex; flex-direction:column; overflow:hidden;}
+.note-template-card-head{display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--line-soft); flex:none;}
+.note-template-card-head h3{margin:0; font-size:15px;}
+.note-template-card-body{padding:14px 18px; overflow-y:auto; flex:1;}
+.note-template-section-label{font-size:11.5px; font-weight:600; color:var(--ink-soft); margin-bottom:8px;}
+.note-template-list{display:flex; flex-direction:column; gap:8px; margin-bottom:18px;}
+.note-template-item{display:flex; align-items:flex-start; gap:8px; border:1px solid var(--line-soft); border-radius:8px; padding:8px 10px;}
+.note-template-item .txt{flex:1; font-size:12.5px; color:var(--ink-soft); white-space:pre-wrap; cursor:pointer; line-height:1.4;}
+.note-template-item .txt b{display:block; color:var(--ink); font-size:13px; margin-bottom:2px;}
+.note-template-item .txt:hover b{color:var(--primary);}
+.note-template-empty{color:var(--ink-faint); font-size:12.5px; text-align:center; padding:14px 0;}
+.note-template-new{border-top:1px dashed var(--line); padding-top:14px;}
+.note-template-new label{font-size:11.5px; font-weight:600; color:var(--ink-soft); display:block; margin-bottom:4px;}
+.note-template-new input, .note-template-new textarea{width:100%; font-family:var(--sans); font-size:13px; padding:7px 9px; border-radius:7px; border:1px solid var(--line); margin-bottom:10px;}
+
 /* ---------- misc ---------- */
 .loading{display:flex; align-items:center; gap:9px; color:var(--ink-soft); font-size:13.5px; padding:20px;}
 .spinner{width:16px;height:16px;border-radius:50%; border:2px solid var(--line); border-top-color:var(--primary); animation:spin .7s linear infinite;}
@@ -684,7 +703,14 @@ tbody tr:last-child td{border-bottom:none;}
             <div class="field"><label>Gliding surface</label><input type="text" id="rf-implant_gliding_surface"></div>
           </div>
           <div class="grid grid-1" style="margin-top:12px;">
-            <div class="field"><label>Note</label><textarea id="rf-implant_note" rows="3" style="width:100%; font-family:var(--sans); font-size:13.5px; padding:8px 10px; border-radius:7px; border:1px solid var(--line);"></textarea></div>
+            <div class="field">
+              <label>Note</label>
+              <div class="note-toolbar">
+                <button type="button" class="btn btn-sm btn-ghost" onclick="openNoteTemplateModal('new')">📑 สร้าง Template</button>
+                <button type="button" class="btn btn-sm btn-ghost" onclick="openNoteTemplateModal('list')">📋 เลือกข้อความ</button>
+              </div>
+              <textarea id="rf-implant_note" rows="3" style="width:100%; font-family:var(--sans); font-size:13.5px; padding:8px 10px; border-radius:7px; border:1px solid var(--line);"></textarea>
+            </div>
           </div>
         </div>
 
@@ -751,11 +777,6 @@ tbody tr:last-child td{border-bottom:none;}
         </div>
       </div>
       <div class="card card-pad" id="detail-body"></div>
-      <div class="card card-pad" id="detail-gallery-card" style="margin-top:16px;">
-        <h3 style="margin-top:0; font-size:15px;">รูปภาพ</h3>
-        <div class="gallery" id="detail-gallery"></div>
-        <div id="print-footer">TKA Registry — Patient Report</div>
-      </div>
     </section>
 
     <!-- ===== USERS (admin) ===== -->
@@ -775,6 +796,27 @@ tbody tr:last-child td{border-bottom:none;}
 
 <div id="toast"></div>
 <div id="lightbox" onclick="closeLightbox()"><button class="lb-close" onclick="closeLightbox()">✕</button><img id="lightbox-img"></div>
+
+<div id="note-template-modal" class="note-template-modal" onclick="if(event.target===this) closeNoteTemplateModal()">
+  <div class="note-template-card">
+    <div class="note-template-card-head">
+      <h3>📝 Template บันทึกข้อความ (Note)</h3>
+      <button type="button" class="btn btn-sm btn-ghost" onclick="closeNoteTemplateModal()">✕</button>
+    </div>
+    <div class="note-template-card-body">
+      <div class="note-template-section-label">รายการ Template — คลิกที่ข้อความเพื่อนำไปใช้</div>
+      <div class="note-template-list" id="note-template-list"></div>
+      <div class="note-template-new">
+        <div class="note-template-section-label">＋ เพิ่ม Template ใหม่</div>
+        <label>ชื่อ Template</label>
+        <input type="text" id="note-template-new-name" placeholder="เช่น หมายเหตุมาตรฐาน">
+        <label>ข้อความ</label>
+        <textarea id="note-template-new-text" rows="3" placeholder="พิมพ์ข้อความที่ต้องการบันทึกเป็น Template"></textarea>
+        <button type="button" class="btn btn-primary btn-sm" onclick="saveNewNoteTemplate(this)">💾 บันทึก Template</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ============================================================
@@ -1144,7 +1186,7 @@ function renderPatientDetailGrouped(rec){
             <div class="label">${label}</div>
             <div class="value">${escapeHtml(valueFor(key))}</div>
           </div>
-        `).join('') : `<div id="detail-images-group" class="detail-images-inside-group"></div>`}
+        `).join('') : `<div id="detail-images-group" class="detail-images-inside-group"><div class="gallery" id="detail-gallery"></div></div>`}
       </div>
     </section>
   `).join('');
@@ -1648,7 +1690,7 @@ async function uploadPendingImages(recordId){
 }
 
 async function viewDetail(id){
- showView('detail');document.getElementById('detail-body').innerHTML='<div class="loading"><span class="spinner"></span> กำลังโหลดข้อมูล…</div>';document.getElementById('detail-gallery').innerHTML='';
+ showView('detail');document.getElementById('detail-body').innerHTML='<div class="loading"><span class="spinner"></span> กำลังโหลดข้อมูล…</div>';
  const {data:rec,error}=await sb.from('records').select('*').eq('id',id).single();if(error){document.getElementById('detail-body').innerHTML='<div class="empty-note">'+escapeHtml(error.message)+'</div>';return}
  window.currentPatientRecord=rec;window.currentRecord=rec;document.getElementById('detail-title').textContent=getPatientFullName(rec);document.getElementById('detail-sub').textContent=`HN ${rec.hn} · ${rec.procedure||'-'} · ${formatDate(rec.surgery_date)}`;
  renderPatientDetailGrouped(rec);document.getElementById('detail-edit-btn').onclick=()=>openForm(id);document.getElementById('detail-delete-btn').onclick=()=>deleteRecord(id);applyRoleUI();
@@ -1945,6 +1987,91 @@ async function syncAllToGoogleSheets(){
   let total=0;for(const table of ['records','profiles','record_images']){const {data,error}=await sb.from(table).select('*').limit(10000);if(error)throw new Error(table+': '+error.message);for(const row of data||[]){await syncPostToGoogle({type:'INSERT',table,schema:'firebase',record:row,old_record:null});total++}}
   showToast(`สำรองข้อมูลแล้ว ${total} รายการ`);
  }catch(e){showToast('สำรองไม่สำเร็จ: '+e.message,true)}finally{if(btn){btn.disabled=false;btn.textContent='☁ สำรองไป Google Sheets'}}
+}
+
+/* ---------------- NOTE TEMPLATES (Firestore — sync ได้ทุกที่ที่ Login) ---------------- */
+let noteTemplatesCache=[];
+
+async function loadNoteTemplates(){
+  if(!currentUser || !sb) return [];
+  const {data,error}=await sb.from('note_templates').select('*').eq('created_by',currentUser.id).order('created_at');
+  if(error){ console.error('LOAD NOTE TEMPLATES ERROR:',error); return []; }
+  noteTemplatesCache=data||[];
+  return noteTemplatesCache;
+}
+
+async function renderNoteTemplateList(){
+  const wrap=document.getElementById('note-template-list');
+  if(!wrap) return;
+  wrap.innerHTML='<div class="note-template-empty">กำลังโหลด…</div>';
+  const list=await loadNoteTemplates();
+  if(!list.length){ wrap.innerHTML='<div class="note-template-empty">ยังไม่มี Template ที่บันทึกไว้</div>'; return; }
+  wrap.innerHTML=list.map(t=>`
+    <div class="note-template-item">
+      <div class="txt" onclick="useNoteTemplate('${t.id}')"><b>${escapeHtml(t.name)}</b>${escapeHtml(t.text)}</div>
+      <button type="button" class="btn btn-sm btn-ghost" title="ลบ Template นี้" onclick="deleteNoteTemplate('${t.id}')">🗑</button>
+    </div>`).join('');
+}
+
+function openNoteTemplateModal(focus){
+  if(!currentUser){ showToast('กรุณา Login ก่อนใช้งาน Template',true); return; }
+  const ta=document.getElementById('rf-implant_note');
+  if(focus==='new'){
+    const nameEl=document.getElementById('note-template-new-name');
+    const textEl=document.getElementById('note-template-new-text');
+    if(nameEl) nameEl.value='';
+    if(textEl) textEl.value = ta ? ta.value : '';
+  }
+  document.getElementById('note-template-modal').classList.add('open');
+  renderNoteTemplateList();
+  if(focus==='new'){
+    setTimeout(()=>{
+      document.getElementById('note-template-new-name')?.focus();
+    },30);
+  }
+}
+
+function closeNoteTemplateModal(){
+  document.getElementById('note-template-modal').classList.remove('open');
+}
+
+async function saveNewNoteTemplate(btn){
+  const nameEl=document.getElementById('note-template-new-name');
+  const textEl=document.getElementById('note-template-new-text');
+  const name=(nameEl.value||'').trim();
+  const text=(textEl.value||'').trim();
+  if(!text){ showToast('กรุณากรอกข้อความก่อนบันทึก Template', true); return; }
+  if(!currentUser){ showToast('กรุณา Login ก่อน',true); return; }
+  if(btn){ btn.disabled=true; btn.textContent='กำลังบันทึก…'; }
+  const {error}=await sb.from('note_templates').insert({
+    name: name || 'Template',
+    text,
+    created_by: currentUser.id
+  });
+  if(btn){ btn.disabled=false; btn.textContent='💾 บันทึก Template'; }
+  if(error){ showToast('บันทึก Template ไม่สำเร็จ: '+error.message,true); return; }
+  nameEl.value=''; textEl.value='';
+  await renderNoteTemplateList();
+  showToast('บันทึก Template แล้ว — ใช้งานได้ทุกอุปกรณ์ที่ Login บัญชีนี้');
+}
+
+function useNoteTemplate(id){
+  const t=noteTemplatesCache.find(x=>String(x.id)===String(id));
+  if(!t) return;
+  const ta=document.getElementById('rf-implant_note');
+  if(ta) ta.value=t.text;
+  closeNoteTemplateModal();
+  showToast('เลือกข้อความแล้ว');
+}
+
+async function deleteNoteTemplate(id){
+  const t=noteTemplatesCache.find(x=>String(x.id)===String(id));
+  if(!t) return;
+  if(!confirm(`ลบ Template "${t.name}" ใช่หรือไม่?`)) return;
+  const {error}=await sb.from('note_templates').delete().eq('id',id);
+  if(error){ showToast('ลบไม่สำเร็จ: '+error.message,true); return; }
+  await renderNoteTemplateList();
+  showToast('ลบ Template แล้ว');
 }
 
 function printPatientReport(record){
