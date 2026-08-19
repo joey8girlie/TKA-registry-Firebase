@@ -1391,7 +1391,7 @@ function renderExistingImages(images){
     </div>
   `).join('');
   applyRoleUI();
-  images.forEach(img => loadSignedThumbnail(img.file_path));
+  loadSignedThumbnailsBatch(images.map(img => img.file_path));
 }
 
 
@@ -1696,7 +1696,7 @@ async function viewDetail(id){
  window.currentPatientRecord=rec;window.currentRecord=rec;document.getElementById('detail-title').textContent=getPatientFullName(rec);document.getElementById('detail-sub').textContent=`HN ${rec.hn} · ${rec.procedure||'-'} · ${formatDate(rec.surgery_date)}`;
  renderPatientDetailGrouped(rec);document.getElementById('detail-edit-btn').onclick=()=>openForm(id);document.getElementById('detail-delete-btn').onclick=()=>deleteRecord(id);applyRoleUI();
  const {data:images}=await sb.from('record_images').select('*').eq('record_id',id).order('created_at');const gallery=document.getElementById('detail-gallery');if(!images?.length){gallery.innerHTML='<div class="empty-note">ยังไม่มีรูปภาพ</div>';return}
- gallery.innerHTML=images.map(img=>`<div><img data-path="${escapeHtml(img.file_path)}" src="${getPublicOrSignedUrlPlaceholder()}" onclick="openLightboxByPath('${String(img.file_path).replace(/'/g,"\\'")}')" alt=""><div class="gcap">${escapeHtml(img.image_type||'')}</div></div>`).join('');images.forEach(img=>loadSignedThumbnail(img.file_path));
+ gallery.innerHTML=images.map(img=>`<div><img data-path="${escapeHtml(img.file_path)}" src="${getPublicOrSignedUrlPlaceholder()}" onclick="openLightboxByPath('${String(img.file_path).replace(/'/g,"\\'")}')" alt=""><div class="gcap">${escapeHtml(img.image_type||'')}</div></div>`).join('');loadSignedThumbnailsBatch(images.map(img=>img.file_path));
 }
 
 async function deleteRecord(id){
@@ -1714,6 +1714,23 @@ async function deleteRecord(id){
 
 const imageUrlCache=new Map();
 const imagePromiseCache=new Map();
+const THUMB_CACHE_PREFIX='tka_thumb_';
+
+function readThumbCache(key){
+  try{ return localStorage.getItem(THUMB_CACHE_PREFIX+key); }
+  catch(e){ return null; }
+}
+function writeThumbCache(key,src){
+  try{ localStorage.setItem(THUMB_CACHE_PREFIX+key,src); }
+  catch(e){
+    // Quota exceeded — drop the oldest half of cached thumbnails and retry once.
+    try{
+      const keys=Object.keys(localStorage).filter(k=>k.startsWith(THUMB_CACHE_PREFIX));
+      keys.slice(0,Math.ceil(keys.length/2)).forEach(k=>localStorage.removeItem(k));
+      localStorage.setItem(THUMB_CACHE_PREFIX+key,src);
+    }catch(e2){ /* in-memory cache still works even if localStorage is unusable */ }
+  }
+}
 
 async function loadSignedThumbnail(path){
   const key=String(path||'');
@@ -1723,6 +1740,12 @@ async function loadSignedThumbnail(path){
 
   const promise=(async()=>{
     try{
+      const cached=readThumbCache(key);
+      if(cached){
+        imageUrlCache.set(key,cached);
+        document.querySelectorAll(`img[data-path="${cssEscape(key)}"]`).forEach(img=>img.src=cached);
+        return cached;
+      }
       const id=key.replace(/^drive:/,'');
       const url=GOOGLE_DRIVE_BACKUP_URL+'?key='+encodeURIComponent(GOOGLE_DRIVE_BACKUP_SECRET)+'&kind=image&file_id='+encodeURIComponent(id)+'&thumb=1';
       const resp=await fetch(url,{cache:'force-cache'});
@@ -1731,6 +1754,7 @@ async function loadSignedThumbnail(path){
       if(!j.ok||!j.base64)throw new Error(j.error||'ไม่พบรูป');
       const src='data:'+(j.mime_type||'image/jpeg')+';base64,'+j.base64;
       imageUrlCache.set(key,src);
+      writeThumbCache(key,src);
       document.querySelectorAll(`img[data-path="${cssEscape(key)}"]`).forEach(img=>img.src=src);
       return src;
     }catch(e){
@@ -1742,6 +1766,49 @@ async function loadSignedThumbnail(path){
   })();
   imagePromiseCache.set(key,promise);
   return promise;
+}
+
+/**
+ * Loads thumbnails for a whole gallery in ONE request instead of one request
+ * per image (checking the persistent cache first). Falls back to the
+ * one-by-one loader if the batch call itself fails, so a single bad response
+ * never breaks the whole gallery.
+ */
+async function loadSignedThumbnailsBatch(paths){
+  const keys=Array.from(new Set((paths||[]).map(p=>String(p||'')).filter(Boolean)));
+  const toFetch=[];
+  for(const key of keys){
+    if(imageUrlCache.has(key))continue;
+    const cached=readThumbCache(key);
+    if(cached){
+      imageUrlCache.set(key,cached);
+      document.querySelectorAll(`img[data-path="${cssEscape(key)}"]`).forEach(img=>img.src=cached);
+    }else{
+      toFetch.push(key);
+    }
+  }
+  if(!toFetch.length)return;
+  const ids=toFetch.map(k=>k.replace(/^drive:/,''));
+  try{
+    const url=GOOGLE_DRIVE_BACKUP_URL+'?key='+encodeURIComponent(GOOGLE_DRIVE_BACKUP_SECRET)+'&kind=images_batch&thumb=1&file_ids='+encodeURIComponent(ids.join(','));
+    const resp=await fetch(url);
+    if(!resp.ok)throw new Error('HTTP '+resp.status);
+    const j=await resp.json();
+    if(!j.ok)throw new Error(j.error||'โหลดรูปไม่สำเร็จ');
+    toFetch.forEach((key,idx)=>{
+      const id=ids[idx];
+      const entry=j.images&&j.images[id];
+      if(entry&&entry.base64){
+        const src='data:'+(entry.mime_type||'image/jpeg')+';base64,'+entry.base64;
+        imageUrlCache.set(key,src);
+        writeThumbCache(key,src);
+        document.querySelectorAll(`img[data-path="${cssEscape(key)}"]`).forEach(img=>img.src=src);
+      }
+    });
+  }catch(e){
+    console.warn('batch thumbnail load failed, falling back to individual loads',e);
+    await Promise.all(toFetch.map(key=>loadSignedThumbnail(key)));
+  }
 }
 
 async function preloadImagesFast(images,concurrency=4){
@@ -1897,14 +1964,19 @@ async function deleteExistingImage(imageId,filePath){
 
 async function openLightboxByPath(path){
  try{
-  const id=String(path).replace(/^drive:/,'');
+  const key=String(path||'');
+  const lbImg=document.getElementById('lightbox-img');
+  // Show the modal immediately with whatever thumbnail we already have
+  // cached, instead of waiting for the full-res fetch before anything appears.
+  lbImg.src=imageUrlCache.get(key)||readThumbCache(key)||getPublicOrSignedUrlPlaceholder();
+  document.getElementById('lightbox').style.display='flex';
+  const id=key.replace(/^drive:/,'');
   const url=GOOGLE_DRIVE_BACKUP_URL+'?key='+encodeURIComponent(GOOGLE_DRIVE_BACKUP_SECRET)+'&kind=image&file_id='+encodeURIComponent(id);
   const resp=await fetch(url);
   if(!resp.ok) throw new Error('โหลดรูป HTTP '+resp.status);
   const j=await resp.json();
   if(!j.ok || !j.base64) throw new Error(j.error||'ไม่พบข้อมูลรูป');
-  document.getElementById('lightbox-img').src='data:'+(j.mime_type||'image/jpeg')+';base64,'+j.base64;
-  document.getElementById('lightbox').style.display='flex';
+  lbImg.src='data:'+(j.mime_type||'image/jpeg')+';base64,'+j.base64;
  }catch(e){showToast('เปิดรูปไม่สำเร็จ: '+e.message,true)}
 }
 
