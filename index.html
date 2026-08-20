@@ -1027,10 +1027,11 @@ window.addEventListener('DOMContentLoaded',()=>{
   const s=document.createElement('script');
   s.type='module';
   s.textContent=`import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js';
-import { getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,updateProfile,sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js';
+import { getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,updateProfile,sendPasswordResetEmail,setPersistence,browserSessionPersistence } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js';
 import { getFirestore,collection,doc,setDoc,getDocs,query,where,updateDoc,deleteDoc } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js';
 const cfg=${JSON.stringify(FIREBASE_CONFIG)};
 const app=initializeApp(cfg); const auth=getAuth(app); const db=getFirestore(app);
+await setPersistence(auth, browserSessionPersistence);
 window.__fb={app,auth,db,collection,doc,setDoc,getDocs,query,where,updateDoc,deleteDoc,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,updateProfile,sendPasswordResetEmail,onAuthStateChanged};`;
   document.head.appendChild(s);
   const timer=setInterval(()=>{
@@ -1078,6 +1079,7 @@ function showAuthScreen(){
   document.getElementById('auth-screen').style.display = 'flex';
   document.getElementById('app-shell').style.display = 'none';
   currentUser = null; currentProfile = null;
+  try{ localStorage.removeItem('tka_last_view'); localStorage.removeItem('tka_last_record_id'); }catch(e){}
 }
 
 
@@ -1244,7 +1246,13 @@ async function loadList(){
   const { data, error, count } = await buildListQuery();
   if(error){ tbody.innerHTML = `<tr><td colspan="7"><div class="empty-note">โหลดข้อมูลไม่สำเร็จ: ${error.message}</div></td></tr>`; return; }
   if(!data || data.length === 0){ tbody.innerHTML = `<tr><td colspan="7"><div class="empty-note">ไม่พบข้อมูล</div></td></tr>`; document.getElementById('list-count').textContent=''; return; }
-  tbody.innerHTML = data.map(r => `
+  // เรียงตามวันที่ผ่าตัดล่าสุดอยู่บนสุด เก่ากว่าไล่ลงไปเรื่อยๆ (รายการที่ไม่มีวันที่ผ่าตัดจะอยู่ท้ายสุด)
+  const sorted = [...data].sort((a,b)=>{
+    const ta = a.surgery_date ? new Date(a.surgery_date).getTime() : -Infinity;
+    const tb = b.surgery_date ? new Date(b.surgery_date).getTime() : -Infinity;
+    return tb - ta;
+  });
+  tbody.innerHTML = sorted.map(r => `
     <tr onclick="viewDetail('${r.id}')" style="cursor:pointer">
       <td class="hn-cell" data-label="HN">${escapeHtml(r.hn||'-')}</td>
       <td data-label="ชื่อ-สกุล">${escapeHtml(getPatientFullName(r))}</td>
