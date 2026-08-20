@@ -292,6 +292,12 @@ tbody tr:last-child td{border-bottom:none;}
 #lightbox{display:none; position:fixed; inset:0; background:rgba(10,20,18,.88); z-index:200; align-items:center; justify-content:center; padding:30px;}
 #lightbox img{max-width:100%; max-height:100%; border-radius:8px;}
 #lightbox .lb-close{position:absolute; top:18px; right:22px; background:rgba(255,255,255,.12); border:none; color:#fff; width:38px; height:38px; border-radius:50%; font-size:18px; cursor:pointer;}
+#lightbox .lb-nav{position:absolute; top:50%; transform:translateY(-50%); background:rgba(255,255,255,.12); border:none; color:#fff; width:46px; height:46px; border-radius:50%; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center;}
+#lightbox .lb-nav:hover{background:rgba(255,255,255,.24);}
+#lightbox .lb-nav:disabled{opacity:.3; cursor:default;}
+#lightbox .lb-prev{left:18px;}
+#lightbox .lb-next{right:18px;}
+#lightbox .lb-counter{position:absolute; bottom:18px; left:50%; transform:translateX(-50%); background:rgba(255,255,255,.14); color:#fff; font-size:12.5px; padding:5px 12px; border-radius:999px;}
 
 /* ---------- note templates ---------- */
 .note-toolbar{display:flex; gap:8px; margin:2px 0 8px; flex-wrap:wrap;}
@@ -819,7 +825,13 @@ tbody tr:last-child td{border-bottom:none;}
 </div>
 
 <div id="toast"></div>
-<div id="lightbox" onclick="closeLightbox()"><button class="lb-close" onclick="closeLightbox()">✕</button><img id="lightbox-img"></div>
+<div id="lightbox" onclick="if(event.target===this) closeLightbox()">
+  <button class="lb-close" onclick="closeLightbox()">✕</button>
+  <button class="lb-nav lb-prev" onclick="event.stopPropagation();lightboxPrev()">‹</button>
+  <img id="lightbox-img">
+  <button class="lb-nav lb-next" onclick="event.stopPropagation();lightboxNext()">›</button>
+  <div class="lb-counter" id="lightbox-counter"></div>
+</div>
 
 <div id="note-template-modal" class="note-template-modal" onclick="if(event.target===this) closeNoteTemplateModal()">
   <div class="note-template-card">
@@ -1412,10 +1424,11 @@ function resetForm(){
 
 function renderExistingImages(images){
   const grid = document.getElementById('existing-image-grid');
-  if(images.length === 0){ grid.innerHTML=''; return; }
-  grid.innerHTML = images.map(img => `
+  if(images.length === 0){ grid.innerHTML=''; setLightboxGallery([]); return; }
+  setLightboxGallery(images.map(img => img.file_path));
+  grid.innerHTML = images.map((img, idx) => `
     <div class="image-card" data-image-id="${img.id}">
-      <img class="thumb" src="${getPublicOrSignedUrlPlaceholder()}" data-path="${img.file_path}" onclick="openLightboxByPath('${img.file_path}')" alt="">
+      <img class="thumb" src="${getPublicOrSignedUrlPlaceholder()}" data-path="${img.file_path}" onclick="openLightboxByPath('${img.file_path}', ${idx})" alt="">
       <div class="meta">
         <div style="font-size:11px; color:var(--ink-soft); margin-bottom:4px;">${escapeHtml(img.image_type||'อื่นๆ')}</div>
         <div style="font-size:11px; color:var(--ink-faint);">${escapeHtml(img.description||'')}</div>
@@ -1512,7 +1525,32 @@ function removePendingImage(idx){ pendingNewImages.splice(idx,1); renderNewImage
 
 
 
-function closeLightbox(){ document.getElementById('lightbox').style.display = 'none'; }
+let lightboxImagePaths = [];
+let lightboxImageIndex = -1;
+
+function setLightboxGallery(paths){ lightboxImagePaths = paths || []; }
+
+function closeLightbox(){ document.getElementById('lightbox').style.display = 'none'; lightboxImageIndex = -1; }
+
+document.addEventListener('keydown', (e)=>{
+  const lb = document.getElementById('lightbox');
+  if(!lb || lb.style.display !== 'flex') return;
+  if(e.key === 'Escape') closeLightbox();
+  else if(e.key === 'ArrowLeft') lightboxPrev();
+  else if(e.key === 'ArrowRight') lightboxNext();
+});
+
+function lightboxNext(){
+  if(!lightboxImagePaths.length || lightboxImageIndex < 0) return;
+  const next = (lightboxImageIndex + 1) % lightboxImagePaths.length;
+  openLightboxByPath(lightboxImagePaths[next], next);
+}
+
+function lightboxPrev(){
+  if(!lightboxImagePaths.length || lightboxImageIndex < 0) return;
+  const prev = (lightboxImageIndex - 1 + lightboxImagePaths.length) % lightboxImagePaths.length;
+  openLightboxByPath(lightboxImagePaths[prev], prev);
+}
 
 
 
@@ -1783,8 +1821,9 @@ async function viewDetail(id){
  const {data:rec,error}=await sb.from('records').select('*').eq('id',id).single();if(error){document.getElementById('detail-body').innerHTML='<div class="empty-note">'+escapeHtml(error.message)+'</div>';return}
  window.currentPatientRecord=rec;window.currentRecord=rec;document.getElementById('detail-title').textContent=getPatientFullName(rec);document.getElementById('detail-sub').textContent=`HN ${rec.hn} · ${rec.procedure||'-'} · ${formatDate(rec.surgery_date)}`;
  renderPatientDetailGrouped(rec);document.getElementById('detail-edit-btn').onclick=()=>openForm(id);document.getElementById('detail-delete-btn').onclick=()=>deleteRecord(id);applyRoleUI();
- const {data:images}=await sb.from('record_images').select('*').eq('record_id',id).order('created_at');const gallery=document.getElementById('detail-gallery');if(!images?.length){gallery.innerHTML='<div class="empty-note">ยังไม่มีรูปภาพ</div>';return}
- gallery.innerHTML=images.map(img=>`<div><img data-path="${escapeHtml(img.file_path)}" src="${getPublicOrSignedUrlPlaceholder()}" onclick="openLightboxByPath('${String(img.file_path).replace(/'/g,"\\'")}')" alt=""><div class="gcap">${escapeHtml(img.image_type||'')}</div></div>`).join('');loadSignedThumbnailsBatch(images.map(img=>img.file_path));
+ const {data:images}=await sb.from('record_images').select('*').eq('record_id',id).order('created_at');const gallery=document.getElementById('detail-gallery');if(!images?.length){gallery.innerHTML='<div class="empty-note">ยังไม่มีรูปภาพ</div>';setLightboxGallery([]);return}
+ setLightboxGallery(images.map(img=>img.file_path));
+ gallery.innerHTML=images.map((img,idx)=>`<div><img data-path="${escapeHtml(img.file_path)}" src="${getPublicOrSignedUrlPlaceholder()}" onclick="openLightboxByPath('${String(img.file_path).replace(/'/g,"\\'")}', ${idx})" alt=""><div class="gcap">${escapeHtml(img.image_type||'')}</div></div>`).join('');loadSignedThumbnailsBatch(images.map(img=>img.file_path));
 }
 
 async function deleteRecord(id){
@@ -2050,10 +2089,23 @@ async function deleteExistingImage(imageId,filePath){
  document.querySelector(`[data-image-id="${imageId}"]`)?.remove();showToast('ลบรูปแล้ว');
 }
 
-async function openLightboxByPath(path){
+async function openLightboxByPath(path, index){
  try{
   const key=String(path||'');
+  if(typeof index === 'number' && index >= 0){
+    lightboxImageIndex = index;
+  }else{
+    const idx = lightboxImagePaths.indexOf(key);
+    lightboxImageIndex = idx;
+  }
   const lbImg=document.getElementById('lightbox-img');
+  const counter=document.getElementById('lightbox-counter');
+  const prevBtn=document.querySelector('#lightbox .lb-prev');
+  const nextBtn=document.querySelector('#lightbox .lb-next');
+  const hasMultiple = lightboxImagePaths.length > 1 && lightboxImageIndex >= 0;
+  if(prevBtn) prevBtn.style.display = hasMultiple ? 'flex' : 'none';
+  if(nextBtn) nextBtn.style.display = hasMultiple ? 'flex' : 'none';
+  if(counter) counter.textContent = hasMultiple ? `${lightboxImageIndex+1} / ${lightboxImagePaths.length}` : '';
   // Show the modal immediately with whatever thumbnail we already have
   // cached, instead of waiting for the full-res fetch before anything appears.
   lbImg.src=imageUrlCache.get(key)||readThumbCache(key)||getPublicOrSignedUrlPlaceholder();
