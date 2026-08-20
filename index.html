@@ -1092,6 +1092,8 @@ function applyRoleUI(){
   // normalize กันเคส role เป็น 'Admin' / มีช่องว่างติดมา แล้วเทียบไม่ตรง
   const rawRole = currentProfile?.role || null;
   const role = rawRole ? String(rawRole).trim().toLowerCase() : null;
+  const displayName = (currentProfile?.username || currentProfile?.full_name || currentUser?.email || '-').trim();
+  document.getElementById('user-email').textContent = displayName;
   document.getElementById('user-role-badge').textContent = rawRole || '?';
   document.querySelectorAll('.role-gate').forEach(el => {
     el.classList.toggle('gate-hidden', !(role === 'admin' || role === 'staff'));
