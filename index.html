@@ -141,6 +141,14 @@ main{flex:1; width:100%; max-width:1180px; margin:0 auto; padding:20px 16px 64px
 }
 @media(max-width:900px){.vitals-strip{grid-template-columns:repeat(3,1fr);}}
 @media(max-width:520px){.vitals-strip{grid-template-columns:repeat(2,1fr);}}
+.dashboard-charts-row{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px;}
+@media(max-width:760px){.dashboard-charts-row{grid-template-columns:1fr;}}
+.pie-chart-wrap{display:flex; align-items:center; gap:20px; flex-wrap:wrap; justify-content:center; padding:6px 0 2px;}
+.pie-chart-wrap svg{flex:none;}
+.pie-legend{display:flex; flex-direction:column; gap:7px; font-size:12.5px; color:var(--ink-soft);}
+.pie-legend .pie-legend-item{display:flex; align-items:center; gap:7px;}
+.pie-legend .pie-legend-item b{color:var(--ink);}
+.pie-dot{width:10px; height:10px; border-radius:50%; display:inline-block; flex:none;}
 .vital{
   background:var(--primary); border-radius:var(--radius); padding:14px 14px 12px;
   color:#EAF5F2; position:relative; overflow:hidden;
@@ -583,6 +591,22 @@ tbody tr:last-child td{border-bottom:none;}
       <div class="card chart-card">
         <h3>จำนวนเคสรายเดือน</h3>
         <div id="monthly-chart"><div class="loading"><span class="spinner"></span> กำลังโหลดข้อมูล…</div></div>
+      </div>
+      <div class="dashboard-charts-row">
+        <div class="card chart-card">
+          <h3>สัดส่วนตำแหน่งผ่าตัด</h3>
+          <div class="pie-chart-wrap">
+            <div id="procedure-pie"><div class="loading"><span class="spinner"></span> กำลังโหลด…</div></div>
+            <div id="procedure-pie-legend" class="pie-legend"></div>
+          </div>
+        </div>
+        <div class="card chart-card">
+          <h3>สัดส่วนเพศ</h3>
+          <div class="pie-chart-wrap">
+            <div id="gender-pie"><div class="loading"><span class="spinner"></span> กำลังโหลด…</div></div>
+            <div id="gender-pie-legend" class="pie-legend"></div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1604,10 +1628,65 @@ async function loadDashboard(){
  const bmiRows=rows.map(r=>parseFloat(r.bmi)).filter(n=>Number.isFinite(n)&&n>0);const avg=bmiRows.length?bmiRows.reduce((a,b)=>a+b,0)/bmiRows.length:0;
  const durations=rows.map(r=>parseFloat(r.surgery_duration_min)).filter(Boolean),avgDur=durations.length?durations.reduce((a,b)=>a+b,0)/durations.length:null;
  const rt=rows.filter(r=>String(r.procedure||'').toLowerCase().includes('rt')).length,lt=rows.filter(r=>String(r.procedure||'').toLowerCase().includes('lt')).length;
- strip.innerHTML=`<div class="vital"><div class="label">ทั้งหมด</div><div class="num">${rows.length}<span class="unit">เคส</span></div></div><div class="vital alt"><div class="label">TKA Rt.</div><div class="num">${rt}</div></div><div class="vital alt"><div class="label">TKA Lt.</div><div class="num">${lt}</div></div><div class="vital alt"><div class="label">Bilat TKA</div><div class="num">${rows.filter(r=>String(r.procedure||'').toLowerCase().includes('bilat')).length}</div></div><div class="vital"><div class="label">BMI เฉลี่ย</div><div class="num">${avg?avg.toFixed(1):'—'}</div></div><div class="vital"><div class="label">เวลาผ่าตัดเฉลี่ย</div><div class="num" style="font-size:20px;">${formatDuration(avgDur)}</div></div>`;
+ const bilat=rows.filter(r=>String(r.procedure||'').toLowerCase().includes('bilat')).length;
+ strip.innerHTML=`<div class="vital"><div class="label">ทั้งหมด</div><div class="num">${rows.length}<span class="unit">เคส</span></div></div><div class="vital alt"><div class="label">TKA Rt.</div><div class="num">${rt}</div></div><div class="vital alt"><div class="label">TKA Lt.</div><div class="num">${lt}</div></div><div class="vital alt"><div class="label">Bilat TKA</div><div class="num">${bilat}</div></div><div class="vital"><div class="label">BMI เฉลี่ย</div><div class="num">${avg?avg.toFixed(1):'—'}</div></div><div class="vital"><div class="label">เวลาผ่าตัดเฉลี่ย</div><div class="num" style="font-size:20px;">${formatDuration(avgDur)}</div></div>`;
  const months={};rows.filter(r=>r.surgery_date).forEach(r=>{const m=String(r.surgery_date).slice(0,7);months[m]=(months[m]||0)+1});const monthly=Object.entries(months).sort();
- if(!monthly.length){chart.innerHTML='<div class="empty-note">ยังไม่มีข้อมูลผ่าตัดที่มีวันที่ระบุ</div>';return}
- const max=Math.max(...monthly.map(x=>x[1]),1);chart.innerHTML='<div class="bars">'+monthly.slice(-12).map(([m,n])=>`<div class="bar-col"><div class="bar-val">${n}</div><div class="bar" style="height:${Math.max(6,n/max*120)}px"></div><div class="bar-lbl">${m}</div></div>`).join('')+'</div>';
+ if(!monthly.length){chart.innerHTML='<div class="empty-note">ยังไม่มีข้อมูลผ่าตัดที่มีวันที่ระบุ</div>';}
+ else{
+   const max=Math.max(...monthly.map(x=>x[1]),1);chart.innerHTML='<div class="bars">'+monthly.slice(-12).map(([m,n])=>`<div class="bar-col"><div class="bar-val">${n}</div><div class="bar" style="height:${Math.max(6,n/max*120)}px"></div><div class="bar-lbl">${m}</div></div>`).join('')+'</div>';
+ }
+ const otherProc=Math.max(0, rows.length-rt-lt-bilat);
+ renderPieChart('procedure-pie','procedure-pie-legend',[
+   {label:'TKA Rt.', value:rt, color:'#2A5C8A'},
+   {label:'TKA Lt.', value:lt, color:'#BE8A34'},
+   {label:'Bilat TKA', value:bilat, color:'#2E7D5B'},
+   {label:'ไม่ระบุ', value:otherProc, color:'#B5BEBD'}
+ ]);
+ const male=rows.filter(r=>String(r.gender||'').trim()==='ชาย').length;
+ const female=rows.filter(r=>String(r.gender||'').trim()==='หญิง').length;
+ const genderOther=Math.max(0, rows.length-male-female);
+ renderPieChart('gender-pie','gender-pie-legend',[
+   {label:'ชาย', value:male, color:'#2A5C8A'},
+   {label:'หญิง', value:female, color:'#C46B8E'},
+   {label:'ไม่ระบุ', value:genderOther, color:'#B5BEBD'}
+ ]);
+}
+
+function renderPieChart(containerId, legendId, dataArr){
+  const container=document.getElementById(containerId);
+  const legend=document.getElementById(legendId);
+  if(!container) return;
+  const items=dataArr.filter(d=>d.value>0);
+  const total=items.reduce((s,d)=>s+d.value,0);
+  if(!total){
+    container.innerHTML='<div class="empty-note">ยังไม่มีข้อมูล</div>';
+    if(legend) legend.innerHTML='';
+    return;
+  }
+  const cx=90,cy=90,r=80;
+  let svgInner='';
+  if(items.length===1){
+    svgInner=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${items[0].color}"><title>${escapeHtml(items[0].label)}: ${items[0].value} (100%)</title></circle>`;
+  }else{
+    let angleStart=-90;
+    items.forEach(d=>{
+      const angle=(d.value/total)*360;
+      const angleEnd=angleStart+angle;
+      const large=angle>180?1:0;
+      const x1=cx+r*Math.cos(angleStart*Math.PI/180), y1=cy+r*Math.sin(angleStart*Math.PI/180);
+      const x2=cx+r*Math.cos(angleEnd*Math.PI/180), y2=cy+r*Math.sin(angleEnd*Math.PI/180);
+      const pct=((d.value/total)*100).toFixed(1);
+      svgInner+=`<path d="M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${large} 1 ${x2.toFixed(2)},${y2.toFixed(2)} Z" fill="${d.color}"><title>${escapeHtml(d.label)}: ${d.value} (${pct}%)</title></path>`;
+      angleStart=angleEnd;
+    });
+  }
+  container.innerHTML=`<svg viewBox="0 0 180 180" width="180" height="180">${svgInner}</svg>`;
+  if(legend){
+    legend.innerHTML=dataArr.map(d=>{
+      const pct=total?((d.value/total)*100).toFixed(1):'0.0';
+      return `<div class="pie-legend-item"><span class="pie-dot" style="background:${d.color}"></span>${escapeHtml(d.label)} — <b>${d.value}</b> (${pct}%)</div>`;
+    }).join('');
+  }
 }
 
 async function openForm(recordId){
