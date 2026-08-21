@@ -299,6 +299,68 @@ tbody tr:last-child td{border-bottom:none;}
 #lightbox .lb-next{right:18px;}
 #lightbox .lb-counter{position:absolute; bottom:18px; left:50%; transform:translateX(-50%); background:rgba(255,255,255,.14); color:#fff; font-size:12.5px; padding:5px 12px; border-radius:999px;}
 
+/* ---------- board view (TV / projector display) ---------- */
+#board-view{
+  display:none; position:fixed; inset:0; z-index:300;
+  background:var(--surface); overflow-y:auto;
+}
+#board-view.open{display:block;}
+#board-view-inner{min-height:100%; padding:clamp(16px,2.2vw,40px); font-family:var(--sans);}
+#board-close-btn{
+  position:fixed; top:18px; right:18px; z-index:310;
+  background:var(--danger); color:#fff; border:none; border-radius:999px;
+  padding:10px 18px; font-size:15px; font-weight:600; cursor:pointer; box-shadow:var(--shadow);
+}
+#board-header{
+  display:flex; align-items:flex-end; justify-content:space-between; gap:24px;
+  border-bottom:4px solid var(--primary); padding-bottom:clamp(10px,1.4vw,18px); margin-bottom:clamp(14px,2vw,24px);
+}
+#board-name{font-family:var(--serif); font-weight:700; color:var(--primary); font-size:clamp(26px,4vw,54px); line-height:1.15;}
+#board-meta{font-size:clamp(15px,1.6vw,24px); color:var(--ink-soft); margin-top:6px; font-weight:600;}
+#board-clock{font-family:var(--mono); font-size:clamp(18px,2.2vw,30px); color:var(--ink-faint); white-space:nowrap;}
+#board-header-right{display:flex; flex-direction:column; align-items:flex-end; gap:4px;}
+#board-save-status{font-size:clamp(12px,1.1vw,15px); font-weight:600; min-height:1.2em;}
+#board-grid{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:clamp(12px,1.6vw,22px);
+}
+.board-card{
+  background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius);
+  padding:clamp(14px,1.6vw,22px);
+}
+.board-card h3{
+  margin:0 0 12px; font-family:var(--serif); font-size:clamp(16px,1.6vw,22px); color:var(--primary);
+  border-bottom:2px solid var(--line-soft); padding-bottom:8px;
+}
+.board-item{display:flex; justify-content:space-between; gap:12px; padding:6px 0; font-size:clamp(14px,1.5vw,20px); border-bottom:1px dashed var(--line-soft);}
+.board-item:last-child{border-bottom:none;}
+.board-item .k{color:var(--ink-soft); font-weight:600;}
+.board-item .v{color:var(--ink); font-weight:700; text-align:right;}
+.board-card.wide{grid-column:1 / -1;}
+.board-pulse-table{width:100%; border-collapse:collapse; font-size:clamp(13px,1.3vw,18px);}
+.board-pulse-table th,.board-pulse-table td{border:1px solid var(--line); padding:8px 10px; text-align:center;}
+.board-pulse-table th{background:var(--primary-glow); color:var(--primary); font-weight:700;}
+
+/* ---- editable board fields ---- */
+.board-field{margin-bottom:clamp(10px,1.2vw,16px);}
+.board-field label{display:block; font-size:clamp(12px,1.1vw,15px); font-weight:700; color:var(--ink-soft); margin-bottom:4px;}
+.board-field input,.board-field select,.board-field textarea{
+  width:100%; font-family:var(--sans); font-size:clamp(15px,1.6vw,22px); font-weight:600; color:var(--ink);
+  border:1px solid var(--line); border-radius:8px; padding:8px 10px; background:var(--surface);
+}
+.board-field textarea{min-height:2.6em; resize:vertical; font-weight:500;}
+.board-field input:focus,.board-field select:focus,.board-field textarea:focus{
+  outline:2px solid var(--primary-light); outline-offset:1px; border-color:var(--primary-light);
+}
+.board-row{display:flex; gap:10px; flex-wrap:wrap;}
+.board-row > .board-field{flex:1; min-width:120px;}
+.board-name-row > .board-field:first-child{flex:0 0 110px;}
+.board-resection-table{width:100%; border-collapse:collapse;}
+.board-resection-table th,.board-resection-table td{border:1px solid var(--line); padding:6px 8px; text-align:center;}
+.board-resection-table th{background:var(--primary-glow); color:var(--primary); font-weight:700; font-size:clamp(12px,1.2vw,16px);}
+.board-resection-table td:first-child{text-align:left; font-weight:600; font-size:clamp(12px,1.2vw,16px);}
+.board-resection-table input{width:70px; text-align:center; font-size:clamp(13px,1.3vw,17px); font-weight:700; border:1px solid var(--line); border-radius:6px; padding:5px;}
+#board-tq-duration-wrap{font-size:clamp(13px,1.4vw,18px); font-weight:700; color:var(--primary); margin-top:4px;}
+
 /* ---------- note templates ---------- */
 .note-toolbar{display:flex; gap:8px; margin:2px 0 8px; flex-wrap:wrap;}
 .note-template-modal{display:none; position:fixed; inset:0; background:rgba(10,20,18,.55); z-index:210; align-items:center; justify-content:center; padding:20px;}
@@ -622,6 +684,7 @@ tbody tr:last-child td{border-bottom:none;}
         <div><h1>รายการผู้ป่วย</h1><p>ค้นหาและจัดการข้อมูลผู้ป่วยทั้งหมด</p></div>
         <div style="display:flex; gap:8px;">
           <button class="btn" onclick="exportCSV()">⬇ Export CSV</button>
+          <button class="btn role-gate gate-hidden" onclick="openBoardView(null)">🖥 เพิ่มผู้ป่วยใหม่ (คีย์ขึ้นจอ)</button>
           <button class="btn btn-accent role-gate gate-hidden" onclick="openForm(null)">+ เพิ่มข้อมูล</button>
         </div>
       </div>
@@ -802,6 +865,7 @@ tbody tr:last-child td{border-bottom:none;}
         <div><h1 id="detail-title">รายละเอียดผู้ป่วย</h1><p id="detail-sub"></p></div>
         <div style="display:flex; gap:8px;">
           <button class="btn" onclick="printPatientReport(window.currentPatientRecord||window.currentRecord||{});">🖨 พิมพ์</button>
+          <button class="btn btn-accent" onclick="openBoardView(window.currentPatientRecord||window.currentRecord||{});">🖥 แสดงขึ้นจอ</button>
           <button class="btn btn-accent role-gate gate-hidden" id="detail-edit-btn">✎ แก้ไข</button>
           <button class="btn btn-danger admin-gate gate-hidden" id="detail-delete-btn">🗑 ลบ</button>
         </div>
@@ -831,6 +895,23 @@ tbody tr:last-child td{border-bottom:none;}
   <img id="lightbox-img">
   <button class="lb-nav lb-next" onclick="event.stopPropagation();lightboxNext()">›</button>
   <div class="lb-counter" id="lightbox-counter"></div>
+</div>
+
+<div id="board-view">
+  <div id="board-view-inner">
+    <button id="board-close-btn" onclick="closeBoardView()" title="ปิด (Esc)">✕ ปิด</button>
+    <header id="board-header">
+      <div id="board-header-main">
+        <div id="board-name"></div>
+        <div id="board-meta"></div>
+      </div>
+      <div id="board-header-right">
+        <div id="board-save-status"></div>
+        <div id="board-clock"></div>
+      </div>
+    </header>
+    <div id="board-grid"></div>
+  </div>
 </div>
 
 <div id="note-template-modal" class="note-template-modal" onclick="if(event.target===this) closeNoteTemplateModal()">
@@ -881,7 +962,24 @@ const FORM_FIELDS = ['hn','name_prefix','first_name','last_name','gender','age',
   'extension_lag_deg','varus_deg','valgus_deg',
   'implant_femoral','implant_tibial','implant_gliding_surface','implant_note',
   'surgery_start','surgery_end','surgery_duration_min',
-  'debridement_time_min','suture_time_min', ...PULSE_FIELDS];
+  'debridement_time_min','suture_time_min',
+  'diagnosis','surgeon_name','resection_order','drug_formula','note',
+  'resection_dlf_m','resection_dlf_d','resection_dmf_m','resection_dmf_d',
+  'resection_plt_m','resection_plt_d','resection_pmt_m','resection_pmt_d',
+  'resection_plf_m','resection_plf_d','resection_pmf_m','resection_pmf_d',
+  ...PULSE_FIELDS];
+
+/* หกตำแหน่งตัดกระดูก เรียงตามรูปกระดานจริง (Distal Lateral/Medial Femur,
+   Proximal Lateral/Medial Tibia, Posterior Lateral/Medial Femur) แต่ละตำแหน่ง
+   มี 2 ช่อง M / D ตามที่ระบุไว้บนกระดาน */
+const RESECTION_SITES = [
+  ['dlf','Distal Lateral Femur'],
+  ['dmf','Distal Medial Femur'],
+  ['plt','Proximal Lateral Tibia'],
+  ['pmt','Proximal Medial Tibia'],
+  ['plf','Posterior Lateral Femur'],
+  ['pmf','Posterior Medial Femur']
+];
 
 let sb = null;
 let currentUser = null;
@@ -1203,7 +1301,21 @@ function renderPatientDetailGrouped(rec){
       ]
     },
     {
-      title: '8. รูปภาพ',
+      title: '8. วินิจฉัย / ผ่าตัด / ตำแหน่งตัดกระดูก',
+      fields: [
+        ['diagnosis','วินิจฉัย (Dx)'],['surgeon_name','ศัลยแพทย์'],['resection_order','ตำแหน่งที่ตัด'],
+        ['drug_formula','สูตรยา'],
+        ['resection_dlf_m','Distal Lateral Femur (M)'],['resection_dlf_d','Distal Lateral Femur (D)'],
+        ['resection_dmf_m','Distal Medial Femur (M)'],['resection_dmf_d','Distal Medial Femur (D)'],
+        ['resection_plt_m','Proximal Lateral Tibia (M)'],['resection_plt_d','Proximal Lateral Tibia (D)'],
+        ['resection_pmt_m','Proximal Medial Tibia (M)'],['resection_pmt_d','Proximal Medial Tibia (D)'],
+        ['resection_plf_m','Posterior Lateral Femur (M)'],['resection_plf_d','Posterior Lateral Femur (D)'],
+        ['resection_pmf_m','Posterior Medial Femur (M)'],['resection_pmf_d','Posterior Medial Femur (D)'],
+        ['note','Note']
+      ]
+    },
+    {
+      title: '9. รูปภาพ',
       fields: []
     }
   ];
@@ -1233,6 +1345,252 @@ function renderPatientDetailGrouped(rec){
 
   // Reuse the existing image renderer if present.
   if(typeof renderDetailImages === 'function') renderDetailImages(rec);
+}
+
+/* ---------------- BOARD VIEW (แสดงขึ้นจอ / TV-projector display, กรอกได้ + auto-save) ---------------- */
+
+let _boardClockTimer = null;
+let _boardRecordId = null;
+
+function boardMetaText(rec){
+  return `HN ${rec.hn || '-'} · ${rec.procedure || '-'} · ${formatDate(rec.surgery_date)} · ${rec.gender || '-'} ${rec.age ? rec.age + ' ปี' : ''}`.replace(/\s+·/g,' ·');
+}
+
+/* สร้าง <input>/<select>/<textarea> หนึ่งช่อง พร้อม data-field/data-type ไว้ให้ autosave อ่านค่า */
+function boardFieldHtml(rec, field, label, opts){
+  opts = opts || {};
+  const type = opts.type || 'text';
+  const val = rec?.[field];
+  const safeVal = (val === null || val === undefined) ? '' : val;
+  let inputHtml;
+  if(type === 'select'){
+    inputHtml = `<select data-field="${field}" data-type="text">
+      <option value="">—</option>
+      ${opts.options.map(o => `<option value="${escapeHtml(o)}" ${String(safeVal)===o?'selected':''}>${escapeHtml(o)}</option>`).join('')}
+    </select>`;
+  } else if(type === 'textarea'){
+    inputHtml = `<textarea data-field="${field}" data-type="text">${escapeHtml(safeVal)}</textarea>`;
+  } else {
+    const inputType = type === 'number' ? 'number' : (type === 'date' ? 'date' : (type === 'time' ? 'time' : 'text'));
+    const step = type === 'number' ? ' step="any"' : '';
+    inputHtml = `<input type="${inputType}"${step} data-field="${field}" data-type="${type === 'number' ? 'number' : 'text'}" value="${escapeHtml(String(safeVal).slice(0,type==='time'?5:1000))}">`;
+  }
+  return `<div class="board-field"><label>${label}</label>${inputHtml}</div>`;
+}
+
+function openBoardView(rec){
+  rec = rec || {};
+  const isNew = !rec.id;
+  _boardRecordId = rec.id || null;
+  window.currentPatientRecord = rec;
+  window.currentRecord = rec;
+
+  document.getElementById('board-name').textContent = isNew ? 'ผู้ป่วยใหม่ — ยังไม่มี HN' : getPatientFullName(rec);
+  document.getElementById('board-meta').textContent = isNew ? 'กรอกช่องไหนก่อนก็ได้ ระบบจะสร้างข้อมูลให้อัตโนมัติทันทีที่กรอกช่องแรก' : boardMetaText(rec);
+  document.getElementById('board-save-status').textContent = '';
+
+  const f = (field, label, opts) => boardFieldHtml(rec, field, label, opts);
+
+  const html = `
+    <div class="board-card">
+      <h3>ข้อมูลผู้ป่วย</h3>
+      <div class="board-row">
+        ${f('surgery_date','วันที่',{type:'date'})}
+        ${f('hn','HN')}
+      </div>
+      <div class="board-row board-name-row">
+        ${f('name_prefix','คำนำหน้า',{type:'select',options:['นาย','นาง','นางสาว']})}
+        ${f('first_name','ชื่อ')}
+        ${f('last_name','นามสกุล')}
+      </div>
+      <div class="board-row">
+        ${f('age','อายุ (ปี)',{type:'number'})}
+        ${f('weight_kg','น้ำหนัก (กก.)',{type:'number'})}
+        ${f('height_cm','ส่วนสูง (ซม.)',{type:'number'})}
+      </div>
+    </div>
+
+    <div class="board-card">
+      <h3>วินิจฉัย / ผ่าตัด</h3>
+      ${f('diagnosis','วินิจฉัย (Dx)')}
+      ${f('procedure','Operation',{type:'select',options:['TKA Rt.','TKA Lt.','Bilat TKA']})}
+      ${f('surgeon_name','ศัลยแพทย์')}
+      ${f('resection_order','ตำแหน่งที่ตัด',{type:'select',options:['Tibia first','Femur first']})}
+    </div>
+
+    <div class="board-card">
+      <h3>สูตรยา</h3>
+      ${f('drug_formula','สูตรยาที่ให้',{type:'textarea'})}
+    </div>
+
+    <div class="board-card">
+      <h3>Alignment</h3>
+      <div class="board-row">
+        ${f('extension_lag_deg','Extension lag (°)',{type:'number'})}
+        ${f('varus_deg','Varus (°)',{type:'number'})}
+        ${f('valgus_deg','Valgus (°)',{type:'number'})}
+      </div>
+    </div>
+
+    <div class="board-card">
+      <h3>Tourniquet (TQ)</h3>
+      <div class="board-row">
+        ${f('tq_mmhg','TQ (mmHg)',{type:'number'})}
+        ${f('tq_start','TQ Start',{type:'time'})}
+        ${f('tq_end','TQ End',{type:'time'})}
+      </div>
+      <div id="board-tq-duration-wrap">Duration: <span id="board-tq-duration">${escapeHtml(formatDuration(rec.tq_duration_min))}</span></div>
+    </div>
+
+    <div class="board-card">
+      <h3>เวลา Debridement / Suture</h3>
+      <div class="board-row">
+        ${f('debridement_time_min','Debridement (นาที)',{type:'number'})}
+        ${f('suture_time_min','Suture (นาที)',{type:'number'})}
+      </div>
+    </div>
+
+    <div class="board-card wide">
+      <h3>ตำแหน่งตัดกระดูก (Distal / Proximal / Posterior)</h3>
+      <table class="board-resection-table">
+        <thead><tr><th>ตำแหน่ง</th><th>M</th><th>D</th></tr></thead>
+        <tbody>
+          ${RESECTION_SITES.map(([code,label]) => `
+            <tr>
+              <td>${label}</td>
+              <td><input type="number" step="any" data-field="resection_${code}_m" data-type="number" value="${escapeHtml(String(rec['resection_'+code+'_m'] ?? ''))}"></td>
+              <td><input type="number" step="any" data-field="resection_${code}_d" data-type="number" value="${escapeHtml(String(rec['resection_'+code+'_d'] ?? ''))}"></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="board-card wide">
+      <h3>Note</h3>
+      ${f('note','หมายเหตุ',{type:'textarea'})}
+    </div>
+  `;
+
+  document.getElementById('board-grid').innerHTML = html;
+  document.getElementById('board-grid').addEventListener('change', boardFieldChanged);
+
+  const view = document.getElementById('board-view');
+  view.classList.add('open');
+
+  const el = document.getElementById('board-view-inner');
+  if(el.requestFullscreen){ el.requestFullscreen().catch(()=>{}); }
+
+  const clockEl = document.getElementById('board-clock');
+  const tick = () => { clockEl.textContent = new Date().toLocaleTimeString('th-TH', {hour:'2-digit',minute:'2-digit',second:'2-digit'}); };
+  tick();
+  if(_boardClockTimer) clearInterval(_boardClockTimer);
+  _boardClockTimer = setInterval(tick, 1000);
+
+  document.addEventListener('keydown', boardEscHandler);
+}
+
+function boardEscHandler(e){
+  if(e.key === 'Escape') closeBoardView();
+}
+
+function closeBoardView(){
+  document.getElementById('board-view').classList.remove('open');
+  document.getElementById('board-grid').removeEventListener('change', boardFieldChanged);
+  if(_boardClockTimer){ clearInterval(_boardClockTimer); _boardClockTimer = null; }
+  document.removeEventListener('keydown', boardEscHandler);
+  if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+  // ถ้ามี record แล้ว (ทั้งเคสเดิมหรือเคสใหม่ที่เพิ่งสร้างผ่านหน้าจอนี้) พาไปหน้า
+  // รายละเอียดของเคสนั้นให้เลย พร้อมข้อมูลล่าสุด
+  if(_boardRecordId){
+    if(typeof showView === 'function') showView('detail');
+    if(typeof viewDetail === 'function') viewDetail(_boardRecordId);
+  }
+  _boardRecordId = null;
+}
+
+let _boardSaveStatusTimer = null;
+function showBoardSaveStatus(text, isError){
+  const el = document.getElementById('board-save-status');
+  if(!el) return;
+  el.textContent = text;
+  el.style.color = isError ? 'var(--danger)' : 'var(--success)';
+  if(_boardSaveStatusTimer) clearTimeout(_boardSaveStatusTimer);
+  if(!isError) _boardSaveStatusTimer = setTimeout(() => { el.textContent = ''; }, 2500);
+}
+
+function boardFieldChanged(e){
+  const el = e.target;
+  const field = el.dataset.field;
+  if(!field) return;
+  let value = el.value === '' ? null : el.value;
+  if(value !== null && el.dataset.type === 'number') value = Number(value);
+  boardAutosave(field, value);
+}
+
+/* สร้าง record เปล่าใน Firestore ครั้งแรกที่จำเป็น (โหมดเพิ่มผู้ป่วยใหม่ผ่าน
+   หน้าจอ) แบบกันชนกรณีพิมพ์หลายช่องเร็ว ๆ ไม่ให้สร้าง record ซ้ำ */
+let _boardCreatePromise = null;
+async function ensureBoardRecord(){
+  if(_boardRecordId) return _boardRecordId;
+  if(_boardCreatePromise) return _boardCreatePromise;
+  _boardCreatePromise = (async () => {
+    const payload = { created_by: currentUser?.id || null, created_at: new Date().toISOString() };
+    const { data, error } = await sb.from('records').insert(payload).select('id').single();
+    if(error) throw error;
+    _boardRecordId = data.id;
+    const newRec = { ...payload, id: data.id };
+    window.currentPatientRecord = newRec; window.currentRecord = newRec;
+    backupToGoogleSheets('record_create','records',{...newRec}).catch(()=>{});
+    return data.id;
+  })();
+  try{
+    return await _boardCreatePromise;
+  } finally {
+    _boardCreatePromise = null;
+  }
+}
+
+/* บันทึกทีละฟิลด์ลง Firestore ทันทีที่แก้ (auto-save) — ถ้ายังไม่มี record
+   (โหมดเพิ่มผู้ป่วยใหม่ผ่านหน้าจอ) จะสร้าง record เปล่าให้ก่อนอัตโนมัติ แล้ว
+   ค่อย update ค่าที่กรอกลงไป — คำนวณ BMI/TQ Duration/ชื่อเต็มใหม่ให้ถ้าฟิลด์ที่
+   เกี่ยวข้องถูกแก้ */
+async function boardAutosave(field, value){
+  const rec = window.currentPatientRecord || window.currentRecord || {};
+  const payload = { [field]: value };
+  const merged = { ...rec, [field]: value };
+
+  if(field === 'weight_kg' || field === 'height_cm'){
+    const w = Number(merged.weight_kg), h = Number(merged.height_cm);
+    payload.bmi = (w > 0 && h > 0) ? Number((w / Math.pow(h/100,2)).toFixed(2)) : null;
+  }
+  if(field === 'tq_start' || field === 'tq_end'){
+    payload.tq_duration_min = timeDiffMinutes(merged.tq_start, merged.tq_end);
+    const durEl = document.getElementById('board-tq-duration');
+    if(durEl) durEl.textContent = formatDuration(payload.tq_duration_min);
+  }
+  if(field === 'name_prefix' || field === 'first_name' || field === 'last_name'){
+    payload.full_name = getPatientFullName(merged);
+  }
+
+  showBoardSaveStatus('กำลังบันทึก…');
+  try{
+    const id = await ensureBoardRecord();
+    payload.updated_by = currentUser?.id || null;
+    payload.updated_at = new Date().toISOString();
+    const { error } = await sb.from('records').update(payload).eq('id', id);
+    if(error) throw error;
+    const rec2 = window.currentPatientRecord || window.currentRecord || {};
+    Object.assign(rec2, payload);
+    rec2.id = id;
+    window.currentPatientRecord = rec2; window.currentRecord = rec2;
+    backupToGoogleSheets('record_update','records',{...rec2}).catch(()=>{});
+    showBoardSaveStatus('บันทึกแล้ว ✓');
+    document.getElementById('board-name').textContent = getPatientFullName(rec2);
+    document.getElementById('board-meta').textContent = boardMetaText(rec2);
+  }catch(err){
+    showBoardSaveStatus('บันทึกไม่สำเร็จ: ' + err.message, true);
+  }
 }
 
 
@@ -1641,7 +1999,14 @@ async function handleAuthed(user){
  await loadProfileWithRetry();
  if(!currentProfile){showAuthScreen();return;}
  document.getElementById('auth-screen').style.display='none';document.getElementById('app-shell').style.display='block';
- restoreLastView();loadDashboard();loadList();
+ const deepLinkId = new URLSearchParams(window.location.search).get('record');
+ if(deepLinkId){
+   loadDashboard();loadList();
+   viewDetail(deepLinkId);
+   history.replaceState(null,'',window.location.pathname);
+ }else{
+   restoreLastView();loadDashboard();loadList();
+ }
 }
 
 async function loadProfileWithRetry(){
