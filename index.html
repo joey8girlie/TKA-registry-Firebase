@@ -283,7 +283,7 @@ tbody tr:last-child td{border-bottom:none;}
 #toast{
   position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px);
   background:var(--ink); color:#fff; padding:11px 20px; border-radius:9px; font-size:13.5px;
-  opacity:0; pointer-events:none; transition:.25s; z-index:100; box-shadow:0 10px 30px rgba(0,0,0,.25);
+  opacity:0; pointer-events:none; transition:.25s; z-index:410; box-shadow:0 10px 30px rgba(0,0,0,.25);
 }
 #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 #toast.err{background:var(--danger);}
@@ -370,7 +370,7 @@ tbody tr:last-child td{border-bottom:none;}
 
 /* ---------- note templates ---------- */
 .note-toolbar{display:flex; gap:8px; margin:2px 0 8px; flex-wrap:wrap;}
-.note-template-modal{display:none; position:fixed; inset:0; background:rgba(10,20,18,.55); z-index:210; align-items:center; justify-content:center; padding:20px;}
+.note-template-modal{display:none; position:fixed; inset:0; background:rgba(10,20,18,.55); z-index:400; align-items:center; justify-content:center; padding:20px;}
 .note-template-modal.open{display:flex;}
 .note-template-card{background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); width:100%; max-width:520px; max-height:82vh; display:flex; flex-direction:column; overflow:hidden;}
 .note-template-card-head{display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--line-soft); flex:none;}
@@ -1517,9 +1517,13 @@ function openBoardView(rec){
   const view = document.getElementById('board-view');
   view.classList.add('open');
 
-  const el = document.getElementById('board-view-inner');
-  if(el.requestFullscreen){
-    el.requestFullscreen()
+  // fullscreen ทั้งหน้าเอกสาร (ไม่ใช่แค่ตัว board-view-inner) เพื่อให้ modal
+  // เลือก/สร้าง Template และ popup อื่น ๆ ที่อยู่นอก board-view ยังแสดงทับได้
+  // ปกติตอนอยู่ใน fullscreen — ถ้า fullscreen เฉพาะ board-view-inner, element
+  // ที่อยู่นอก subtree นั้นจะไม่ถูกเรนเดอร์เลยแม้ z-index จะสูงกว่าก็ตาม
+  const fsTarget = document.documentElement;
+  if(fsTarget.requestFullscreen){
+    fsTarget.requestFullscreen()
       .then(() => {
         // ล็อกจอแนวนอนถ้าอุปกรณ์รองรับ (เช่น แท็บเล็ต/มือถือ) — เดสก์ท็อป/TV
         // ส่วนใหญ่เป็นแนวนอนอยู่แล้วจึงไม่มีผล ถ้าไม่รองรับก็แค่ข้ามเงียบ ๆ
