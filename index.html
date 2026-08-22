@@ -307,26 +307,21 @@ tbody tr:last-child td{border-bottom:none;}
 #board-view.open{display:block;}
 #board-view-inner{
   height:100vh; width:100vw; box-sizing:border-box; overflow:hidden;
-  display:flex; flex-direction:column; padding:clamp(8px,1.2vh,20px) clamp(10px,1.6vh,24px);
+  display:flex; flex-direction:column; padding:clamp(6px,1vh,14px);
   font-family:var(--sans);
 }
 #board-close-btn{
-  position:fixed; top:14px; right:14px; z-index:310;
+  position:fixed; top:10px; right:10px; z-index:310;
   background:var(--danger); color:#fff; border:none; border-radius:999px;
-  padding:8px 16px; font-size:clamp(12px,1.4vh,15px); font-weight:600; cursor:pointer; box-shadow:var(--shadow);
+  padding:6px 14px; font-size:clamp(11px,1.3vh,14px); font-weight:600; cursor:pointer; box-shadow:var(--shadow);
 }
-#board-header{
-  flex:none; display:flex; align-items:flex-end; justify-content:space-between; gap:24px;
-  border-bottom:3px solid var(--primary); padding-bottom:clamp(6px,0.8vh,12px); margin-bottom:clamp(6px,1vh,14px);
+#board-save-status{
+  position:fixed; top:16px; right:110px; z-index:310;
+  font-size:clamp(10px,1.1vh,13px); font-weight:600; min-height:1.2em;
 }
-#board-name{font-family:var(--serif); font-weight:700; color:var(--primary); font-size:clamp(18px,3.2vh,36px); line-height:1.1;}
-#board-meta{font-size:clamp(11px,1.5vh,16px); color:var(--ink-soft); margin-top:3px; font-weight:600;}
-#board-clock{font-family:var(--mono); font-size:clamp(13px,1.9vh,22px); color:var(--ink-faint); white-space:nowrap;}
-#board-header-right{display:flex; flex-direction:column; align-items:flex-end; gap:2px; flex:none;}
-#board-save-status{font-size:clamp(10px,1.1vh,13px); font-weight:600; min-height:1.2em;}
 #board-grid{
   flex:1 1 auto; min-height:0; overflow:hidden;
-  display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:auto auto minmax(0,1.7fr) minmax(0,1fr);
+  display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:auto auto minmax(0,1fr) minmax(0,1fr) auto;
   gap:clamp(6px,0.9vh,14px);
 }
 .board-card{
@@ -334,7 +329,7 @@ tbody tr:last-child td{border-bottom:none;}
   padding:clamp(6px,1vh,14px); min-height:0; overflow:auto; display:flex; flex-direction:column;
 }
 .board-card h3{
-  margin:0 0 6px; font-family:var(--serif); font-size:clamp(11px,1.5vh,16px); color:var(--primary);
+  margin:0 0 6px; font-family:var(--serif); font-size:clamp(12px,1.7vh,18px); color:var(--primary);
   border-bottom:2px solid var(--line-soft); padding-bottom:4px; flex:none;
   display:flex; align-items:center; justify-content:space-between; gap:8px;
 }
@@ -345,16 +340,17 @@ tbody tr:last-child td{border-bottom:none;}
 }
 .board-template-btns button:hover{background:var(--primary-glow);}
 .board-card.wide{grid-column:1 / -1;}
+.board-card.span2{grid-column:span 2;}
 .board-pulse-table{width:100%; border-collapse:collapse; font-size:clamp(10px,1.2vh,14px);}
 .board-pulse-table th,.board-pulse-table td{border:1px solid var(--line); padding:4px 6px; text-align:center;}
 .board-pulse-table th{background:var(--primary-glow); color:var(--primary); font-weight:700;}
 
 /* ---- editable board fields ---- */
 .board-field{margin-bottom:clamp(4px,0.7vh,10px);}
-.board-field label{display:block; font-size:clamp(9px,1vh,12px); font-weight:700; color:var(--ink-soft); margin-bottom:2px;}
+.board-field label{display:block; font-size:clamp(9px,1.05vh,13px); font-weight:700; color:var(--ink-soft); margin-bottom:2px;}
 .board-field input,.board-field select,.board-field textarea{
-  width:100%; font-family:var(--sans); font-size:clamp(11px,1.5vh,16px); font-weight:600; color:var(--ink);
-  border:1px solid var(--line); border-radius:7px; padding:4px 7px; background:var(--surface); box-sizing:border-box;
+  width:100%; font-family:var(--sans); font-size:clamp(12px,1.8vh,19px); font-weight:600; color:var(--ink);
+  border:1px solid var(--line); border-radius:7px; padding:5px 8px; background:var(--surface); box-sizing:border-box;
 }
 .board-field textarea{min-height:2.4em; resize:none; font-weight:500;}
 .board-field input:focus,.board-field select:focus,.board-field textarea:focus{
@@ -362,6 +358,8 @@ tbody tr:last-child td{border-bottom:none;}
 }
 .board-row{display:flex; gap:8px; flex-wrap:wrap;}
 .board-row > .board-field{flex:1; min-width:90px;}
+.board-row-inline{flex:1 1 auto; display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;}
+.board-row-inline > .board-field{flex:1; min-width:100px;}
 .board-name-row > .board-field:first-child{flex:0 0 90px;}
 .board-resection-table{width:100%; border-collapse:collapse;}
 .board-resection-table th,.board-resection-table td{border:1px solid var(--line); padding:3px 5px; text-align:center;}
@@ -908,17 +906,8 @@ tbody tr:last-child td{border-bottom:none;}
 
 <div id="board-view">
   <div id="board-view-inner">
+    <div id="board-save-status"></div>
     <button id="board-close-btn" onclick="closeBoardView()" title="ปิด (Esc)">✕ ปิด</button>
-    <header id="board-header">
-      <div id="board-header-main">
-        <div id="board-name"></div>
-        <div id="board-meta"></div>
-      </div>
-      <div id="board-header-right">
-        <div id="board-save-status"></div>
-        <div id="board-clock"></div>
-      </div>
-    </header>
     <div id="board-grid"></div>
   </div>
 </div>
@@ -1408,55 +1397,33 @@ function openBoardView(rec){
   window.currentPatientRecord = rec;
   window.currentRecord = rec;
 
-  document.getElementById('board-name').textContent = isNew ? 'ผู้ป่วยใหม่ — ยังไม่มี HN' : getPatientFullName(rec);
-  document.getElementById('board-meta').textContent = isNew ? 'กรอกช่องไหนก่อนก็ได้ ระบบจะสร้างข้อมูลให้อัตโนมัติทันทีที่กรอกช่องแรก' : boardMetaText(rec);
   document.getElementById('board-save-status').textContent = '';
+  if(isNew) showToast('ผู้ป่วยใหม่ — กรอกช่องไหนก่อนก็ได้ ระบบจะสร้างข้อมูลให้อัตโนมัติทันทีที่กรอกช่องแรก');
 
   const f = (field, label, opts) => boardFieldHtml(rec, field, label, opts);
 
   const html = `
-    <div class="board-card">
+    <div class="board-card wide">
       <h3>ข้อมูลผู้ป่วย</h3>
-      <div class="board-row">
+      <div class="board-row-inline">
         ${f('surgery_date','วันที่',{type:'date'})}
         ${f('hn','HN')}
-      </div>
-      <div class="board-row board-name-row">
         ${f('name_prefix','คำนำหน้า',{type:'select',options:['นาย','นาง','นางสาว']})}
         ${f('first_name','ชื่อ')}
         ${f('last_name','นามสกุล')}
-      </div>
-      <div class="board-row">
         ${f('age','อายุ (ปี)',{type:'number'})}
         ${f('weight_kg','น้ำหนัก (กก.)',{type:'number'})}
         ${f('height_cm','ส่วนสูง (ซม.)',{type:'number'})}
       </div>
     </div>
 
-    <div class="board-card">
+    <div class="board-card wide">
       <h3>วินิจฉัย / ผ่าตัด</h3>
-      ${f('diagnosis','วินิจฉัย (Dx)')}
-      ${f('procedure','Operation',{type:'select',options:['TKA Rt.','TKA Lt.','Bilat TKA']})}
-      ${f('surgeon_name','ศัลยแพทย์')}
-      ${f('resection_order','ตำแหน่งที่ตัด',{type:'select',options:['Tibia first','Femur first']})}
-    </div>
-
-    <div class="board-card">
-      <h3>สูตรยา
-        <span class="board-template-btns">
-          <button type="button" onclick="openNoteTemplateModal('new','board-field-drug_formula')">📑 สร้าง</button>
-          <button type="button" onclick="openNoteTemplateModal('list','board-field-drug_formula')">📋 เลือก</button>
-        </span>
-      </h3>
-      ${f('drug_formula','สูตรยาที่ให้',{type:'textarea'})}
-    </div>
-
-    <div class="board-card">
-      <h3>Alignment</h3>
-      <div class="board-row">
-        ${f('extension_lag_deg','Extension lag (°)',{type:'number'})}
-        ${f('varus_deg','Varus (°)',{type:'number'})}
-        ${f('valgus_deg','Valgus (°)',{type:'number'})}
+      <div class="board-row-inline">
+        ${f('diagnosis','วินิจฉัย (Dx)')}
+        ${f('procedure','Operation',{type:'select',options:['TKA Rt.','TKA Lt.','Bilat TKA']})}
+        ${f('surgeon_name','ศัลยแพทย์')}
+        ${f('resection_order','ตำแหน่งที่ตัด',{type:'select',options:['Tibia first','Femur first']})}
       </div>
     </div>
 
@@ -1471,22 +1438,25 @@ function openBoardView(rec){
     </div>
 
     <div class="board-card">
-      <h3>Pulse Post-op</h3>
-      <table class="board-pulse-table">
-        <thead><tr><th></th><th>Manual DP</th><th>Manual TP</th><th>Digital DP</th><th>Digital TP</th></tr></thead>
-        <tbody>
-          <tr>
-            <td>Post-op</td>
-            <td>${boardPulseSelect(rec,'post_manual_dp')}</td>
-            <td>${boardPulseSelect(rec,'post_manual_tp')}</td>
-            <td>${boardPulseSelect(rec,'post_digital_dp')}</td>
-            <td>${boardPulseSelect(rec,'post_digital_tp')}</td>
-          </tr>
-        </tbody>
-      </table>
+      <h3>Alignment</h3>
+      <div class="board-row">
+        ${f('extension_lag_deg','Extension lag (°)',{type:'number'})}
+        ${f('varus_deg','Varus (°)',{type:'number'})}
+        ${f('valgus_deg','Valgus (°)',{type:'number'})}
+      </div>
     </div>
 
-    <div class="board-card wide">
+    <div class="board-card">
+      <h3>สูตรยา
+        <span class="board-template-btns">
+          <button type="button" onclick="openNoteTemplateModal('new','board-field-drug_formula')">📑 สร้าง</button>
+          <button type="button" onclick="openNoteTemplateModal('list','board-field-drug_formula')">📋 เลือก</button>
+        </span>
+      </h3>
+      ${f('drug_formula','สูตรยาที่ให้',{type:'textarea'})}
+    </div>
+
+    <div class="board-card span2">
       <h3>ตำแหน่งตัดกระดูก (Distal / Proximal / Posterior)</h3>
       <table class="board-resection-table">
         <thead><tr><th>ตำแหน่ง</th><th>M</th><th>D</th></tr></thead>
@@ -1502,9 +1472,30 @@ function openBoardView(rec){
       </table>
     </div>
 
-    <div class="board-card wide">
-      <h3>Note</h3>
+    <div class="board-card">
+      <h3>Note
+        <span class="board-template-btns">
+          <button type="button" onclick="openNoteTemplateModal('new','board-field-note')">📑 สร้าง</button>
+          <button type="button" onclick="openNoteTemplateModal('list','board-field-note')">📋 เลือก</button>
+        </span>
+      </h3>
       ${f('note','หมายเหตุ',{type:'textarea'})}
+    </div>
+
+    <div class="board-card wide">
+      <h3>Pulse Post-op</h3>
+      <table class="board-pulse-table">
+        <thead><tr><th></th><th>Manual DP</th><th>Manual TP</th><th>Digital DP</th><th>Digital TP</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Post-op</td>
+            <td>${boardPulseSelect(rec,'post_manual_dp')}</td>
+            <td>${boardPulseSelect(rec,'post_manual_tp')}</td>
+            <td>${boardPulseSelect(rec,'post_digital_dp')}</td>
+            <td>${boardPulseSelect(rec,'post_digital_tp')}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   `;
 
@@ -1526,12 +1517,6 @@ function openBoardView(rec){
       })
       .catch(() => {});
   }
-
-  const clockEl = document.getElementById('board-clock');
-  const tick = () => { clockEl.textContent = new Date().toLocaleTimeString('th-TH', {hour:'2-digit',minute:'2-digit',second:'2-digit'}); };
-  tick();
-  if(_boardClockTimer) clearInterval(_boardClockTimer);
-  _boardClockTimer = setInterval(tick, 1000);
 
   document.addEventListener('keydown', boardEscHandler);
 }
@@ -1633,8 +1618,6 @@ async function boardAutosave(field, value){
     window.currentPatientRecord = rec2; window.currentRecord = rec2;
     backupToGoogleSheets('record_update','records',{...rec2}).catch(()=>{});
     showBoardSaveStatus('บันทึกแล้ว ✓');
-    document.getElementById('board-name').textContent = getPatientFullName(rec2);
-    document.getElementById('board-meta').textContent = boardMetaText(rec2);
   }catch(err){
     showBoardSaveStatus('บันทึกไม่สำเร็จ: ' + err.message, true);
   }
