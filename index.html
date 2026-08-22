@@ -321,7 +321,7 @@ tbody tr:last-child td{border-bottom:none;}
 }
 #board-grid{
   flex:1 1 auto; min-height:0; overflow:hidden;
-  display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:auto auto minmax(0,1fr) minmax(0,1fr) auto;
+  display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:auto auto auto minmax(0,1fr) minmax(0,1fr) auto;
   gap:clamp(6px,0.9vh,14px);
 }
 .board-card{
@@ -1424,6 +1424,18 @@ function openBoardView(rec){
         ${f('procedure','Operation',{type:'select',options:['TKA Rt.','TKA Lt.','Bilat TKA']})}
         ${f('surgeon_name','ศัลยแพทย์')}
         ${f('resection_order','ตำแหน่งที่ตัด',{type:'select',options:['Tibia first','Femur first']})}
+      </div>
+    </div>
+
+    <div class="board-card wide">
+      <h3>LAB</h3>
+      <div class="board-row-inline">
+        ${f('hct','Hct',{type:'number'})}
+        ${f('hb','Hb',{type:'number'})}
+        ${f('egfr','eGFR',{type:'number'})}
+        ${f('cr','Cr',{type:'number'})}
+        ${f('alb','Alb',{type:'number'})}
+        ${f('hba1c','HbA1C',{type:'number'})}
       </div>
     </div>
 
