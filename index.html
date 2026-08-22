@@ -299,67 +299,76 @@ tbody tr:last-child td{border-bottom:none;}
 #lightbox .lb-next{right:18px;}
 #lightbox .lb-counter{position:absolute; bottom:18px; left:50%; transform:translateX(-50%); background:rgba(255,255,255,.14); color:#fff; font-size:12.5px; padding:5px 12px; border-radius:999px;}
 
-/* ---------- board view (TV / projector display) ---------- */
+/* ---------- board view (TV / projector display) — เต็มจอ 1 หน้า แนวนอน ไม่มี scroll หน้า ---------- */
 #board-view{
   display:none; position:fixed; inset:0; z-index:300;
-  background:var(--surface); overflow-y:auto;
+  background:var(--surface); overflow:hidden;
 }
 #board-view.open{display:block;}
-#board-view-inner{min-height:100%; padding:clamp(16px,2.2vw,40px); font-family:var(--sans);}
+#board-view-inner{
+  height:100vh; width:100vw; box-sizing:border-box; overflow:hidden;
+  display:flex; flex-direction:column; padding:clamp(8px,1.2vh,20px) clamp(10px,1.6vh,24px);
+  font-family:var(--sans);
+}
 #board-close-btn{
-  position:fixed; top:18px; right:18px; z-index:310;
+  position:fixed; top:14px; right:14px; z-index:310;
   background:var(--danger); color:#fff; border:none; border-radius:999px;
-  padding:10px 18px; font-size:15px; font-weight:600; cursor:pointer; box-shadow:var(--shadow);
+  padding:8px 16px; font-size:clamp(12px,1.4vh,15px); font-weight:600; cursor:pointer; box-shadow:var(--shadow);
 }
 #board-header{
-  display:flex; align-items:flex-end; justify-content:space-between; gap:24px;
-  border-bottom:4px solid var(--primary); padding-bottom:clamp(10px,1.4vw,18px); margin-bottom:clamp(14px,2vw,24px);
+  flex:none; display:flex; align-items:flex-end; justify-content:space-between; gap:24px;
+  border-bottom:3px solid var(--primary); padding-bottom:clamp(6px,0.8vh,12px); margin-bottom:clamp(6px,1vh,14px);
 }
-#board-name{font-family:var(--serif); font-weight:700; color:var(--primary); font-size:clamp(26px,4vw,54px); line-height:1.15;}
-#board-meta{font-size:clamp(15px,1.6vw,24px); color:var(--ink-soft); margin-top:6px; font-weight:600;}
-#board-clock{font-family:var(--mono); font-size:clamp(18px,2.2vw,30px); color:var(--ink-faint); white-space:nowrap;}
-#board-header-right{display:flex; flex-direction:column; align-items:flex-end; gap:4px;}
-#board-save-status{font-size:clamp(12px,1.1vw,15px); font-weight:600; min-height:1.2em;}
+#board-name{font-family:var(--serif); font-weight:700; color:var(--primary); font-size:clamp(18px,3.2vh,36px); line-height:1.1;}
+#board-meta{font-size:clamp(11px,1.5vh,16px); color:var(--ink-soft); margin-top:3px; font-weight:600;}
+#board-clock{font-family:var(--mono); font-size:clamp(13px,1.9vh,22px); color:var(--ink-faint); white-space:nowrap;}
+#board-header-right{display:flex; flex-direction:column; align-items:flex-end; gap:2px; flex:none;}
+#board-save-status{font-size:clamp(10px,1.1vh,13px); font-weight:600; min-height:1.2em;}
 #board-grid{
-  display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:clamp(12px,1.6vw,22px);
+  flex:1 1 auto; min-height:0; overflow:hidden;
+  display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:auto auto minmax(0,1.7fr) minmax(0,1fr);
+  gap:clamp(6px,0.9vh,14px);
 }
 .board-card{
   background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius);
-  padding:clamp(14px,1.6vw,22px);
+  padding:clamp(6px,1vh,14px); min-height:0; overflow:auto; display:flex; flex-direction:column;
 }
 .board-card h3{
-  margin:0 0 12px; font-family:var(--serif); font-size:clamp(16px,1.6vw,22px); color:var(--primary);
-  border-bottom:2px solid var(--line-soft); padding-bottom:8px;
+  margin:0 0 6px; font-family:var(--serif); font-size:clamp(11px,1.5vh,16px); color:var(--primary);
+  border-bottom:2px solid var(--line-soft); padding-bottom:4px; flex:none;
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
 }
-.board-item{display:flex; justify-content:space-between; gap:12px; padding:6px 0; font-size:clamp(14px,1.5vw,20px); border-bottom:1px dashed var(--line-soft);}
-.board-item:last-child{border-bottom:none;}
-.board-item .k{color:var(--ink-soft); font-weight:600;}
-.board-item .v{color:var(--ink); font-weight:700; text-align:right;}
+.board-template-btns{display:flex; gap:4px;}
+.board-template-btns button{
+  font-size:clamp(9px,1vh,11px); padding:2px 7px; border-radius:999px; border:1px solid var(--line);
+  background:var(--surface); color:var(--primary); cursor:pointer; font-weight:600; white-space:nowrap;
+}
+.board-template-btns button:hover{background:var(--primary-glow);}
 .board-card.wide{grid-column:1 / -1;}
-.board-pulse-table{width:100%; border-collapse:collapse; font-size:clamp(13px,1.3vw,18px);}
-.board-pulse-table th,.board-pulse-table td{border:1px solid var(--line); padding:8px 10px; text-align:center;}
+.board-pulse-table{width:100%; border-collapse:collapse; font-size:clamp(10px,1.2vh,14px);}
+.board-pulse-table th,.board-pulse-table td{border:1px solid var(--line); padding:4px 6px; text-align:center;}
 .board-pulse-table th{background:var(--primary-glow); color:var(--primary); font-weight:700;}
 
 /* ---- editable board fields ---- */
-.board-field{margin-bottom:clamp(10px,1.2vw,16px);}
-.board-field label{display:block; font-size:clamp(12px,1.1vw,15px); font-weight:700; color:var(--ink-soft); margin-bottom:4px;}
+.board-field{margin-bottom:clamp(4px,0.7vh,10px);}
+.board-field label{display:block; font-size:clamp(9px,1vh,12px); font-weight:700; color:var(--ink-soft); margin-bottom:2px;}
 .board-field input,.board-field select,.board-field textarea{
-  width:100%; font-family:var(--sans); font-size:clamp(15px,1.6vw,22px); font-weight:600; color:var(--ink);
-  border:1px solid var(--line); border-radius:8px; padding:8px 10px; background:var(--surface);
+  width:100%; font-family:var(--sans); font-size:clamp(11px,1.5vh,16px); font-weight:600; color:var(--ink);
+  border:1px solid var(--line); border-radius:7px; padding:4px 7px; background:var(--surface); box-sizing:border-box;
 }
-.board-field textarea{min-height:2.6em; resize:vertical; font-weight:500;}
+.board-field textarea{min-height:2.4em; resize:none; font-weight:500;}
 .board-field input:focus,.board-field select:focus,.board-field textarea:focus{
   outline:2px solid var(--primary-light); outline-offset:1px; border-color:var(--primary-light);
 }
-.board-row{display:flex; gap:10px; flex-wrap:wrap;}
-.board-row > .board-field{flex:1; min-width:120px;}
-.board-name-row > .board-field:first-child{flex:0 0 110px;}
+.board-row{display:flex; gap:8px; flex-wrap:wrap;}
+.board-row > .board-field{flex:1; min-width:90px;}
+.board-name-row > .board-field:first-child{flex:0 0 90px;}
 .board-resection-table{width:100%; border-collapse:collapse;}
-.board-resection-table th,.board-resection-table td{border:1px solid var(--line); padding:6px 8px; text-align:center;}
-.board-resection-table th{background:var(--primary-glow); color:var(--primary); font-weight:700; font-size:clamp(12px,1.2vw,16px);}
-.board-resection-table td:first-child{text-align:left; font-weight:600; font-size:clamp(12px,1.2vw,16px);}
-.board-resection-table input{width:70px; text-align:center; font-size:clamp(13px,1.3vw,17px); font-weight:700; border:1px solid var(--line); border-radius:6px; padding:5px;}
-#board-tq-duration-wrap{font-size:clamp(13px,1.4vw,18px); font-weight:700; color:var(--primary); margin-top:4px;}
+.board-resection-table th,.board-resection-table td{border:1px solid var(--line); padding:3px 5px; text-align:center;}
+.board-resection-table th{background:var(--primary-glow); color:var(--primary); font-weight:700; font-size:clamp(9px,1.1vh,13px);}
+.board-resection-table td:first-child{text-align:left; font-weight:600; font-size:clamp(9px,1.1vh,13px);}
+.board-resection-table input{width:56px; text-align:center; font-size:clamp(10px,1.2vh,14px); font-weight:700; border:1px solid var(--line); border-radius:6px; padding:3px;}
+#board-tq-duration-wrap{font-size:clamp(10px,1.3vh,15px); font-weight:700; color:var(--primary); margin-top:2px; flex:none;}
 
 /* ---------- note templates ---------- */
 .note-toolbar{display:flex; gap:8px; margin:2px 0 8px; flex-wrap:wrap;}
@@ -1362,20 +1371,34 @@ function boardFieldHtml(rec, field, label, opts){
   const type = opts.type || 'text';
   const val = rec?.[field];
   const safeVal = (val === null || val === undefined) ? '' : val;
+  const id = `board-field-${field}`;
   let inputHtml;
   if(type === 'select'){
-    inputHtml = `<select data-field="${field}" data-type="text">
+    inputHtml = `<select id="${id}" data-field="${field}" data-type="text">
       <option value="">—</option>
       ${opts.options.map(o => `<option value="${escapeHtml(o)}" ${String(safeVal)===o?'selected':''}>${escapeHtml(o)}</option>`).join('')}
     </select>`;
   } else if(type === 'textarea'){
-    inputHtml = `<textarea data-field="${field}" data-type="text">${escapeHtml(safeVal)}</textarea>`;
+    inputHtml = `<textarea id="${id}" data-field="${field}" data-type="text">${escapeHtml(safeVal)}</textarea>`;
   } else {
     const inputType = type === 'number' ? 'number' : (type === 'date' ? 'date' : (type === 'time' ? 'time' : 'text'));
     const step = type === 'number' ? ' step="any"' : '';
-    inputHtml = `<input type="${inputType}"${step} data-field="${field}" data-type="${type === 'number' ? 'number' : 'text'}" value="${escapeHtml(String(safeVal).slice(0,type==='time'?5:1000))}">`;
+    inputHtml = `<input id="${id}" type="${inputType}"${step} data-field="${field}" data-type="${type === 'number' ? 'number' : 'text'}" value="${escapeHtml(String(safeVal).slice(0,type==='time'?5:1000))}">`;
   }
-  return `<div class="board-field"><label>${label}</label>${inputHtml}</div>`;
+  const labelHtml = opts.labelExtra
+    ? `<label>${label}${opts.labelExtra}</label>`
+    : `<label>${label}</label>`;
+  return `<div class="board-field">${labelHtml}${inputHtml}</div>`;
+}
+
+/* select แบบกะทัดรัดไว้ใช้ในตาราง Pulse (ไม่มี label ในตัว) */
+function boardPulseSelect(rec, field){
+  const val = rec?.[field] || '';
+  const opts = ['คลำไม่ได้','1+','2+'];
+  return `<select data-field="${field}" data-type="text" id="board-field-${field}">
+    <option value="">-</option>
+    ${opts.map(o => `<option value="${escapeHtml(o)}" ${val===o?'selected':''}>${escapeHtml(o)}</option>`).join('')}
+  </select>`;
 }
 
 function openBoardView(rec){
@@ -1419,7 +1442,12 @@ function openBoardView(rec){
     </div>
 
     <div class="board-card">
-      <h3>สูตรยา</h3>
+      <h3>สูตรยา
+        <span class="board-template-btns">
+          <button type="button" onclick="openNoteTemplateModal('new','board-field-drug_formula')">📑 สร้าง</button>
+          <button type="button" onclick="openNoteTemplateModal('list','board-field-drug_formula')">📋 เลือก</button>
+        </span>
+      </h3>
       ${f('drug_formula','สูตรยาที่ให้',{type:'textarea'})}
     </div>
 
@@ -1443,11 +1471,19 @@ function openBoardView(rec){
     </div>
 
     <div class="board-card">
-      <h3>เวลา Debridement / Suture</h3>
-      <div class="board-row">
-        ${f('debridement_time_min','Debridement (นาที)',{type:'number'})}
-        ${f('suture_time_min','Suture (นาที)',{type:'number'})}
-      </div>
+      <h3>Pulse Post-op</h3>
+      <table class="board-pulse-table">
+        <thead><tr><th></th><th>Manual DP</th><th>Manual TP</th><th>Digital DP</th><th>Digital TP</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Post-op</td>
+            <td>${boardPulseSelect(rec,'post_manual_dp')}</td>
+            <td>${boardPulseSelect(rec,'post_manual_tp')}</td>
+            <td>${boardPulseSelect(rec,'post_digital_dp')}</td>
+            <td>${boardPulseSelect(rec,'post_digital_tp')}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <div class="board-card wide">
@@ -1479,7 +1515,17 @@ function openBoardView(rec){
   view.classList.add('open');
 
   const el = document.getElementById('board-view-inner');
-  if(el.requestFullscreen){ el.requestFullscreen().catch(()=>{}); }
+  if(el.requestFullscreen){
+    el.requestFullscreen()
+      .then(() => {
+        // ล็อกจอแนวนอนถ้าอุปกรณ์รองรับ (เช่น แท็บเล็ต/มือถือ) — เดสก์ท็อป/TV
+        // ส่วนใหญ่เป็นแนวนอนอยู่แล้วจึงไม่มีผล ถ้าไม่รองรับก็แค่ข้ามเงียบ ๆ
+        if(screen.orientation && screen.orientation.lock){
+          screen.orientation.lock('landscape').catch(() => {});
+        }
+      })
+      .catch(() => {});
+  }
 
   const clockEl = document.getElementById('board-clock');
   const tick = () => { clockEl.textContent = new Date().toLocaleTimeString('th-TH', {hour:'2-digit',minute:'2-digit',second:'2-digit'}); };
@@ -1499,6 +1545,7 @@ function closeBoardView(){
   document.getElementById('board-grid').removeEventListener('change', boardFieldChanged);
   if(_boardClockTimer){ clearInterval(_boardClockTimer); _boardClockTimer = null; }
   document.removeEventListener('keydown', boardEscHandler);
+  if(screen.orientation && screen.orientation.unlock) { try{ screen.orientation.unlock(); }catch(e){} }
   if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
   // ถ้ามี record แล้ว (ทั้งเคสเดิมหรือเคสใหม่ที่เพิ่งสร้างผ่านหน้าจอนี้) พาไปหน้า
   // รายละเอียดของเคสนั้นให้เลย พร้อมข้อมูลล่าสุด
@@ -2519,9 +2566,12 @@ async function renderNoteTemplateList(){
     </div>`).join('');
 }
 
-function openNoteTemplateModal(focus){
+let _activeTemplateTargetId = 'rf-implant_note';
+
+function openNoteTemplateModal(focus, targetId){
   if(!currentUser){ showToast('กรุณา Login ก่อนใช้งาน Template',true); return; }
-  const ta=document.getElementById('rf-implant_note');
+  _activeTemplateTargetId = targetId || 'rf-implant_note';
+  const ta=document.getElementById(_activeTemplateTargetId);
   if(focus==='new'){
     const nameEl=document.getElementById('note-template-new-name');
     const textEl=document.getElementById('note-template-new-text');
@@ -2564,8 +2614,15 @@ async function saveNewNoteTemplate(btn){
 function useNoteTemplate(id){
   const t=noteTemplatesCache.find(x=>String(x.id)===String(id));
   if(!t) return;
-  const ta=document.getElementById('rf-implant_note');
-  if(ta) ta.value=t.text;
+  const targetId = _activeTemplateTargetId || 'rf-implant_note';
+  const ta=document.getElementById(targetId);
+  if(ta){
+    ta.value=t.text;
+    // ถ้าเป็นช่องในหน้าจอ "แสดงขึ้นจอ" (board view) ให้บันทึกอัตโนมัติทันที
+    if(targetId.startsWith('board-field-') && ta.dataset.field){
+      boardAutosave(ta.dataset.field, t.text);
+    }
+  }
   closeNoteTemplateModal();
   showToast('เลือกข้อความแล้ว');
 }
